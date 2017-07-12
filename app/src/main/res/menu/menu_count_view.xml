@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <item
+        android:id = "@+id/roomCharts"
+        android:title = "View Room Chart"
+        />
+
+    <item
+        android:id="@+id/resetCounts"
+        android:title="Reset Counts"
+        />
+
+    <item
+        android:id = "@+id/createCount"
+        android:title = "Create New Count"
+        />
+    <item
+        android:id = "@+id/deleteCounts"
+        android:title = "Delete Counts"
+        />
+
+    <item
+        android:id="@+id/printList"
+        android:title="Print Cell List"
+        />
+
+</menu>
