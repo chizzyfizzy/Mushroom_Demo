@@ -36,8 +36,6 @@ public class RoomDAO {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.ROOM_NAME, newRoomName);
         values.put(DatabaseHelper.FK_PLANT_ID, plantId);
-
-
         long insertId = database.insert(DatabaseHelper.TABLE_NAME_ROOMS, null, values);
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_ROOMS, allColumns, DatabaseHelper.ROOM_ID + " = " + insertId, null, null, null, null);
         cursor.moveToFirst();
@@ -45,6 +43,7 @@ public class RoomDAO {
         cursor.close();
         return newRoom;
     }
+
 
     public void deleteRoom(Room room) {
         long id = room.getRoomId();
@@ -81,6 +80,15 @@ public class RoomDAO {
         cursor.close();
         return roomList;
     }
+
+    public void updateRoom(String rName, String rLabel, long rId, long pId){
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.ROOM_NAME, rName);
+        values.put(DatabaseHelper.ROOM_LABEL, rLabel);
+        database.update(DatabaseHelper.TABLE_NAME_ROOMS, values, DatabaseHelper.ROOM_ID + " = " + rId + " AND "
+                                                                + DatabaseHelper.FK_PLANT_ID + " = " + pId, null);
+    }
+
 
     public void deleteAllRoomsForPlant(long plantId){
         System.out.println("All Rooms Deleted For Plant " + plantId);

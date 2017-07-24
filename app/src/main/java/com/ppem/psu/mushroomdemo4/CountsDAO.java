@@ -23,7 +23,7 @@ public class CountsDAO {
     //DB Fields
     private SQLiteDatabase database;
     private DatabaseHelper dbHelper;
-    private String[] allColumns = {DatabaseHelper.COUNT_ID, DatabaseHelper.COUNT_NAME, DatabaseHelper.COUNT_NUMBER, DatabaseHelper.COUNT_CREATED_AT};
+    private String[] allColumns = {DatabaseHelper.COUNT_ID, DatabaseHelper.COUNT_NAME, DatabaseHelper.COUNT_NUMBER, DatabaseHelper.COUNT_CHART_BOOLEAN};
 
     public CountsDAO(Context context) {
         dbHelper = new DatabaseHelper(context);
@@ -37,10 +37,11 @@ public class CountsDAO {
         dbHelper.close();
     }
 
-    public Count createCount(String newCountName, Long roomId){
+    public Count createCount(String newCountName, int isChartCount, Long roomId){
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.COUNT_NAME, newCountName);
-        values.put(DatabaseHelper.COUNT_CREATED_AT, System.currentTimeMillis());
+        values.put(DatabaseHelper.COUNT_CHART_BOOLEAN, isChartCount);
+       // values.put(DatabaseHelper.COUNT_CREATED_AT, System.currentTimeMillis());
         values.put(DatabaseHelper.FK_COUNT_ROOM, roomId);
         long insertId = database.insert(DatabaseHelper.TABLE_NAME_COUNTS, null, values);
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_COUNTS, allColumns, DatabaseHelper.COUNT_ID + " = " + insertId, null, null, null, null);
@@ -50,7 +51,7 @@ public class CountsDAO {
         return newCount;
     }
 
-    public boolean createCountAllRooms(String newCountName){
+    public boolean createCountAllRooms(String newCountName, int isInChart){
         boolean success;
         try {
             //Get room list to iterate through and get the id of each.
@@ -66,7 +67,8 @@ public class CountsDAO {
             //Iterate through each room in roomList and add new count with passed name. Also gives corresponding FK_ROOM_ID for each count
             ContentValues values = new ContentValues();
             values.put(DatabaseHelper.COUNT_NAME, newCountName);
-            values.put(DatabaseHelper.COUNT_CREATED_AT, System.currentTimeMillis());
+            values.put(DatabaseHelper.COUNT_CHART_BOOLEAN, isInChart);
+           // values.put(DatabaseHelper.COUNT_CREATED_AT, System.currentTimeMillis());
             for (int i = 0; i < roomList.size(); i++) {
                 long roomId = roomList.get(i).getRoomId();
                 values.put(DatabaseHelper.FK_COUNT_ROOM, roomId);
@@ -116,6 +118,20 @@ public class CountsDAO {
         return countList;
     }
 
+    public List<Count> getChartCounts (long roomId) {
+        List<Count> countList = new ArrayList<Count>();
+        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_COUNTS, allColumns, DatabaseHelper.FK_COUNT_ROOM + " = " + roomId +
+                                        " AND " + DatabaseHelper.COUNT_CHART_BOOLEAN + " = " + 1, null, null, null, null);
+        cursor.moveToFirst();
+        while(!cursor.isAfterLast()){
+            Count count = cursorToCount(cursor);
+            countList.add(count);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return countList;
+    }
+
     public Count getSpecificCount(long id){
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_COUNTS, allColumns, DatabaseHelper.COUNT_ID + " = " + id, null, null, null,null);
         cursor.moveToFirst();
@@ -132,7 +148,6 @@ public class CountsDAO {
         System.out.println("Updating Counts for Room " + roomId);
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.COUNT_NUMBER, countNum);
-        values.put(DatabaseHelper.COUNT_CREATED_AT, getDateTime());
         database.update(DatabaseHelper.TABLE_NAME_COUNTS, values, DatabaseHelper.COUNT_ID + " = " + countId +
                                                                 " AND " + DatabaseHelper.FK_COUNT_ROOM + " = " + roomId, null);
         return true;
@@ -143,6 +158,26 @@ public class CountsDAO {
         database.delete(DatabaseHelper.TABLE_NAME_COUNTS, DatabaseHelper.COUNT_NUMBER,null);
     }
 
+    public List<Count> getDistinctCounts(){
+        List<Count> countList = new ArrayList<Count>();
+        Cursor cursor = database.query(true, DatabaseHelper.TABLE_NAME_COUNTS, allColumns, null, null, DatabaseHelper.COUNT_NAME, null, null, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            Count count = cursorToCount(cursor);
+            countList.add(count);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return countList;
+    }
+
+    public void createDefaultCount(String name, int useInChart){
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.COUNT_NAME, name);
+        values.put(DatabaseHelper.COUNT_CHART_BOOLEAN, useInChart);
+        database.insert(DatabaseHelper.TABLE_NAME_COUNTS, null, values);
+    }
+
 
 
     private Count cursorToCount(Cursor cursor) {
@@ -150,7 +185,8 @@ public class CountsDAO {
         count.setCountId(cursor.getLong(0));
         count.setCountName(cursor.getString(1));
         count.setCountNumber(cursor.getInt(2));
-        count.setCountDate(cursor.getInt(3));
+        count.setInChart(cursor.getInt(3));
+//        count.setCountDate(cursor.getInt(3));
         return count;
     }
 
@@ -160,13 +196,5 @@ public class CountsDAO {
         room.setRoomName(cursor.getString(1));
         return room;
     }
-
-    private String getDateTime(){
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        Date date = new Date();
-        return dateFormat.format(date);
-    }
-
-
 
 }

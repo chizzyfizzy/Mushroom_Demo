@@ -18,7 +18,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -34,11 +33,8 @@ import java.util.Locale;
 public class CountView extends AppCompatActivity {
 
     private TextView pName, rName, dateText;
-    private Button saveBtn;
+    private Button saveBtn, openChartButton;
     private CountsDAO countDataSource;
-    LinearLayout L2;
-    LinearLayout L1;
-    RelativeLayout RL1;
     List<EditText> allCountsET;
     List<TextView> allCountNamesET;
     TableLayout tableLayout;
@@ -80,6 +76,17 @@ public class CountView extends AppCompatActivity {
             }
         });
 
+        openChartButton = (Button) findViewById(R.id.openChartButton);
+        openChartButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent openRoomChart = new Intent(CountView.this, ChartView2.class);
+                openRoomChart.putExtra("RoomId",theRoomId);
+                startActivity(openRoomChart);
+            }
+        });
+
+
         //Create table layout for counter list & populate lsit view
         tableLayout = (TableLayout) findViewById(R.id.tableLayout);
         populateListView();
@@ -93,7 +100,7 @@ public class CountView extends AppCompatActivity {
     public void populateListView(){
         //Clear table rows so there are no duplicates
         tableLayout.removeAllViews();
-        //Add column row
+        //Add column-titles row
         tableRow = new TableRow(this);
         tableRow.setId(TableRow.NO_ID);
         tableRow.setBackgroundColor(Color.argb(255,63,81,181));
@@ -149,6 +156,8 @@ public class CountView extends AppCompatActivity {
 
 
 
+
+
     //Settings Menu Creator & Handler (3 dots top right of screen)
 
     @Override
@@ -175,7 +184,7 @@ public class CountView extends AppCompatActivity {
             populateListView();
         }
         if(id == R.id.roomCharts){
-            Intent openRoomChart = new Intent(CountView.this, ChartView.class);
+            Intent openRoomChart = new Intent(CountView.this, ChartView2.class);
             openRoomChart.putExtra("RoomId",theRoomId);
             startActivity(openRoomChart);
         }
@@ -224,26 +233,39 @@ public class CountView extends AppCompatActivity {
         layout.setOrientation(LinearLayout.VERTICAL);
         final EditText cName = new EditText(CountView.this);
         layout.addView(cName);
+        final CheckBox isChartCount = new CheckBox(CountView.this);
+        isChartCount.setText("Use this measure on charts");
+        layout.addView(isChartCount);
         final CheckBox copyToAllRooms = new CheckBox(CountView.this);
         copyToAllRooms.setText("Copy To All Rooms and Plants");
         layout.addView(copyToAllRooms);
+
         alertBuilder.setView(layout);
         alertBuilder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                //Check if name is empty
                 if(!cName.getText().toString().isEmpty()) {
+                    int chartCountBool;
+                    if(isChartCount.isChecked()){
+                        chartCountBool = 1;
+                    } else{chartCountBool = 0;}
                     //Box NOT Checked
                     if(!copyToAllRooms.isChecked()) {
-                        countDataSource.createCount(cName.getText().toString(),theRoomId);
+                        countDataSource.createCount(cName.getText().toString(), chartCountBool, theRoomId);
+
                         System.out.println("Adding Count to This Room");
+                        //Refresh view
                         populateListView();
                     }
                     //Box IS Checked
                     else if(copyToAllRooms.isChecked()){
-                        countDataSource.createCountAllRooms(cName.getText().toString());
+                            countDataSource.createCountAllRooms(cName.getText().toString(), chartCountBool);
                         System.out.println("Adding Count to All Rooms and Plants");
+                        //Refresh view
                         populateListView();
                     }
+
                 }else{
                     Toast errorToast = Toast.makeText(CountView.this, "Error, please enter a name for the new measure", Toast.LENGTH_LONG);
                     errorToast.show();

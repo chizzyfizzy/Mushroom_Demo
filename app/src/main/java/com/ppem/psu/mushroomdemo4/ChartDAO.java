@@ -31,7 +31,7 @@ public class ChartDAO {
         dbHelper.close();
     }
 
-    public Chart createChart(int bedNum, boolean bedPeak, int rowNum, long roomId){
+    public Chart createChart(int bedNum, int bedPeak, int rowNum, long roomId){
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.CHART_COL_NUM, bedNum);
         values.put(DatabaseHelper.CHART_ROW_NUM, rowNum);
@@ -121,7 +121,7 @@ public class ChartDAO {
             chart.setChartId(cursor.getLong(0));
             chart.setColNum(cursor.getInt(1));
             chart.setRowNum(cursor.getInt(2));
-            chart.setBedPeak(cursor.getInt(3) > 0);
+            chart.setBedPeak(cursor.getInt(3));
         }
         return chart;
     }

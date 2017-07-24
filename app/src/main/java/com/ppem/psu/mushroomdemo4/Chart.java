@@ -23,8 +23,13 @@ public class Chart {
         return bedPeak;
     }
 
-    public void setBedPeak(boolean bedPeak) {
-        this.bedPeak = bedPeak;
+    public void setBedPeak(int bedPeak) {
+        if (bedPeak == 1) {
+            this.bedPeak = true;
+        }
+        else {
+            this.bedPeak = false;
+        }
     }
 
     public int getColNum() {

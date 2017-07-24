@@ -46,6 +46,18 @@ public class PlantDAO {
         return newPlant;
     }
 
+    public Plant createPlantsForFarm(String newPlantName, long farmId){
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.PLANT_NAME, newPlantName);
+        values.put(DatabaseHelper.FK_PLANT_FARM, farmId);
+        long insertId = database.insert(DatabaseHelper.TABLE_NAME_PLANTS, null, values);
+        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_PLANTS, allColumns, DatabaseHelper.PLANT_ID + " = " + insertId, null, null, null, null);
+        cursor.moveToFirst();
+        Plant newPlant = cursorToPlant(cursor);
+        cursor.close();
+        return newPlant;
+    }
+
     public void deletePlant(Plant plant) {
         long id = plant.getPlantId();
         System.out.println("Plant deleted with id: " +id);
@@ -65,6 +77,26 @@ public class PlantDAO {
         }
         cursor.close();
         return plantList;
+    }
+
+    public List<Plant> getAllPlantsForFarm(long farmId){
+        List<Plant> plantList = new ArrayList<Plant>();
+        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_PLANTS, allColumns, DatabaseHelper.FK_PLANT_FARM + " = " + farmId,null,null,null,null);
+        cursor.moveToFirst();
+        while(!cursor.isAfterLast()){
+            Plant plant = cursorToPlant(cursor);
+            plantList.add(plant);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return plantList;
+    }
+
+    public void updatePlant(String pName, String pLabel, long pId){
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.PLANT_NAME, pName);
+        values.put(DatabaseHelper.PLANT_LABEL, pLabel);
+        database.update(DatabaseHelper.TABLE_NAME_PLANTS, values, DatabaseHelper.PLANT_ID + " = " + pId, null);
     }
 
     public Plant getSpecificPlant(long id){

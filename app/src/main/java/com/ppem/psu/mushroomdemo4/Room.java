@@ -11,6 +11,7 @@ import android.os.Parcelable;
 public class Room {
     private long roomId;
     private String roomName;
+    private String roomLabel;
 
 
     public long getRoomId() {
@@ -29,6 +30,13 @@ public class Room {
         this.roomName = roomName;
     }
 
+    public String getRoomLabel() {
+        return roomLabel;
+    }
+
+    public void setRoomLabel(String roomLabel) {
+        this.roomLabel = roomLabel;
+    }
 
     @Override
     public String toString(){

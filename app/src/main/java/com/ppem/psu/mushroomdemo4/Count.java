@@ -10,6 +10,7 @@ public class Count {
     private long countId;
     private String countName;
     private long countNumber;
+    private boolean inChart;
     private long countDate;
 
     public long getCountId() {
@@ -42,6 +43,19 @@ public class Count {
 
     public void setCountDate(long countDate) {
         this.countDate = countDate;
+    }
+
+    public boolean isInChart() {
+        return inChart;
+    }
+
+    public void setInChart(int inChart) {
+        if(inChart == 0) {
+            this.inChart = false;
+        }
+        if(inChart == 1){
+            this.inChart = true;
+        }
     }
 
     @Override

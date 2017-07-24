@@ -36,9 +36,10 @@
             android:label="@string/title_activity_count_list_view"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ChartView"
-            android:label="@string/title_activity_chart_view"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:name=".ChartView2"
+            android:label="@string/title_activity_chart_view2"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".FarmCountsView"></activity>
     </application>
 
 </manifest>
