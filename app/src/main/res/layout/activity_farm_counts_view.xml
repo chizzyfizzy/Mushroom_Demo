@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.ppem.psu.mushroomdemo4.FarmCountsView">
+
+    <EditText
+        android:id="@+id/newCountEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="New Measure Name"
+        android:inputType="textPersonName"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:id="@+id/addNewCountButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add"
+        android:layout_below="@+id/newCountEditText"
+        android:layout_centerHorizontal="true" />
+
+    <ListView
+        android:id="@+id/farmCountsListView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/addNewCountButton" />
+
+    <CheckBox
+        android:id="@+id/farmChartCountCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="23dp"
+        android:layout_marginStart="23dp"
+        android:text="Use In Chart"
+        android:layout_alignBaseline="@+id/newCountEditText"
+        android:layout_alignBottom="@+id/newCountEditText"
+        android:layout_toRightOf="@+id/newCountEditText"
+        android:layout_toEndOf="@+id/newCountEditText" />
+
+    <Button
+        android:id="@+id/updateCountButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="28dp"
+        android:layout_marginRight="28dp"
+        android:text="Update"
+        android:layout_below="@+id/newCountEditText"
+        android:layout_toLeftOf="@+id/addNewCountButton"
+        android:layout_toStartOf="@+id/addNewCountButton" />
+
+    <Button
+        android:id="@+id/deleteCountButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/farmChartCountCheckBox"
+        android:layout_alignRight="@+id/farmChartCountCheckBox"
+        android:layout_below="@+id/newCountEditText"
+        android:text="Delete" />
+</RelativeLayout>

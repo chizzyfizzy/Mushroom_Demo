@@ -1,37 +1,37 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary">
+    tools:context="com.ppem.psu.mushroomdemo4.ChartFragment">
+
+    <!-- TODO: Update blank fragment layout -->
 
     <GridView
         android:id="@+id/chartGridView"
-        android:layout_width="fill_parent"
-        android:layout_height="400dp"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+
         android:columnWidth="40dp"
         android:horizontalSpacing="10dp"
         android:numColumns="3"
-        android:stretchMode="columnWidth"
         android:verticalSpacing="5dp"
         tools:layout_editor_absoluteX="-238dp"
         tools:layout_editor_absoluteY="129dp"
-        android:layout_below="@+id/textView2"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_above="@+id/saveGridDataButton" />
+        android:layout_above="@+id/saveGridDataButton"
+        android:layout_below="@+id/countSpinner" />
 
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:text="Bed Level"
-        android:textColor="@android:color/background_dark"
-        android:textSize="10sp" />
+        android:layout_toEndOf="@+id/textView3"
+        android:layout_toRightOf="@+id/textView3"
+        android:text="  (Square)"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/textView3"
@@ -40,9 +40,10 @@
         android:layout_alignLeft="@+id/chartGridView"
         android:layout_alignParentTop="true"
         android:layout_alignStart="@+id/chartGridView"
-        android:text="Square "
+        android:text="Bed Level -"
+        android:textAllCaps="false"
         android:textColor="@android:color/background_dark"
-        android:textSize="10sp" />
+        android:textSize="14sp" />
 
 
     <Button
@@ -55,6 +56,15 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
         android:text="Save DAta" />
+
+    <Spinner
+        android:id="@+id/countSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/textView2" />
 
 
 </RelativeLayout>
