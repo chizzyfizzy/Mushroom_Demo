@@ -16,5 +16,10 @@
         android:title = "Delete All Charts"
         />
 
+    <item
+        android:id="@+id/deleteCells"
+        android:title="Delete Cells"
+        />
+
 
 </menu>

@@ -56,7 +56,7 @@ public class CountsDAO {
         try {
             //Get room list to iterate through and get the id of each.
             List<Room> roomList = new ArrayList<Room>();
-            String[] allRoomColumns = {DatabaseHelper.ROOM_ID, DatabaseHelper.ROOM_NAME};
+            String[] allRoomColumns = {DatabaseHelper.ROOM_ID, DatabaseHelper.ROOM_NAME, DatabaseHelper.ROOM_LABEL};
             Cursor roomCursor = database.query(DatabaseHelper.TABLE_NAME_ROOMS, allRoomColumns, null, null, null, null, null);
             roomCursor.moveToFirst();
             while (!roomCursor.isAfterLast()) {
@@ -158,9 +158,16 @@ public class CountsDAO {
         database.delete(DatabaseHelper.TABLE_NAME_COUNTS, DatabaseHelper.COUNT_NUMBER,null);
     }
 
+    public void updateCount(String cName, int inChart, long cId){
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.COUNT_NAME, cName);
+        values.put(DatabaseHelper.COUNT_CHART_BOOLEAN, inChart);
+        database.update(DatabaseHelper.TABLE_NAME_COUNTS, values, DatabaseHelper.COUNT_ID + " = " + cId, null);
+    }
+
     public List<Count> getDistinctCounts(){
         List<Count> countList = new ArrayList<Count>();
-        Cursor cursor = database.query(true, DatabaseHelper.TABLE_NAME_COUNTS, allColumns, null, null, DatabaseHelper.COUNT_NAME, null, null, null);
+        Cursor cursor = database.query(true, DatabaseHelper.TABLE_NAME_COUNTS, allColumns, DatabaseHelper.FK_COUNT_ROOM + " is null ", null, DatabaseHelper.COUNT_NAME, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             Count count = cursorToCount(cursor);

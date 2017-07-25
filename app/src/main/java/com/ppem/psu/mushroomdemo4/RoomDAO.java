@@ -18,7 +18,7 @@ public class RoomDAO {
     //DB Fields
     private SQLiteDatabase database;
     private DatabaseHelper dbHelper;
-    private String[] allColumns = {DatabaseHelper.ROOM_ID, DatabaseHelper.ROOM_NAME};
+    private String[] allColumns = {DatabaseHelper.ROOM_ID, DatabaseHelper.ROOM_NAME, DatabaseHelper.ROOM_LABEL};
 
     public RoomDAO (Context context) {
         dbHelper = new DatabaseHelper(context);

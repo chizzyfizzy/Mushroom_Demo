@@ -13,6 +13,19 @@ public class Count {
     private boolean inChart;
     private long countDate;
 
+    public Count(){
+
+    }
+
+    public Count(String countName){
+        this.countName = countName;
+    }
+
+    public Count(String countName, boolean chartBool){
+        this.countName = countName;
+        this.inChart = chartBool;
+    }
+
     public long getCountId() {
         return countId;
     }

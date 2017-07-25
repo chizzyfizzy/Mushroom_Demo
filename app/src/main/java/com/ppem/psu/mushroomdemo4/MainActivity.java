@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private long farmId;
     private long sharedPrefFarmId = 1;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,7 +98,10 @@ public class MainActivity extends AppCompatActivity {
         //Farm farm = farmDataSource.getSpecificFarm(sharedPrefFarmId);
         Farm farm = farmDataSource.getAllFarms().get(0);
         farmId = farm.getFarmId();
-        populateListView();
+        plantValues = plantDataSource.getAllPlantsForFarm(farmId);
+        pAdapter = new PlantListViewAdapter(this, plantValues);
+        plantLV = (ListView) findViewById(R.id.plantListView);
+        plantLV.setAdapter(pAdapter);
 
         farmName = (TextView) findViewById(R.id.farmNameText) ;
         farmName.setText(farm.getFarmName());
@@ -113,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
                 room.setPlantInfo(p);
                 Intent openRoomListIntent = new Intent(MainActivity.this, RoomView.class);
                 startActivity(openRoomListIntent);
+
             }
         });
 
@@ -155,9 +160,11 @@ public class MainActivity extends AppCompatActivity {
                 } else {pLabel.setText(plant.getPlantLabel()); }
                     layout.addView(pLabel);
                     alertBuilder.setView(layout);
-                    alertBuilder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                    alertBuilder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            plantValues.set(info.position, new Plant(plant.getPlantId(), pName.getText().toString(),  pLabel.getText().toString()));
+                            pAdapter.notifyDataSetChanged();
                             plantDataSource.updatePlant(pName.getText().toString(), pLabel.getText().toString(), plant.getPlantId());
                         }
                     });
@@ -219,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
         //TODO add confirmation message.
         if (id == R.id.deleteData) {
             plantDataSource.deleteAllPlants();
-            populateListView();
+            pAdapter.notifyDataSetChanged();
         }
 
         if (id == R.id.exportData) {
@@ -237,15 +244,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     //populates list view with data from sqlite
-    private void populateListView() {
+/*    private void populateListView() {
 
-        plantValues = plantDataSource.getAllPlantsForFarm(farmId);
-        //final PlantListViewAdapter pAdapter = new PlantListViewAdapter(this, plantValues);
-        pAdapter = new PlantListViewAdapter(this, plantValues);
-
-        plantLV = (ListView) findViewById(R.id.plantListView);
-        plantLV.setAdapter(pAdapter);
-    }
+    }*/
 
     //TODO Create custom dialog xml
     //Create Plant Menu Option Selected
@@ -273,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 if (!pName.getText().toString().isEmpty()) {
                     plantDataSource.createPlant(pName.getText().toString(), pLabel.getText().toString());
-                    populateListView();
+                    //populateListView();
                 } else {
                     Toast errorToast = Toast.makeText(MainActivity.this, "Error, please enter a name for the new plant", Toast.LENGTH_LONG);
                     errorToast.show();
@@ -309,7 +310,7 @@ public class MainActivity extends AppCompatActivity {
                     for(int i = 1; i < Integer.parseInt(buildingNumber.getText().toString()) + 1; i++){
                         plantDataSource.createPlantsForFarm(buildingName.getText().toString() + " " + i, farm.getFarmId());
                     }
-                    populateListView();
+                   // populateListView();
                     dialog.dismiss();
                     //TODO add room/farm/plant names to sharedpreferences. For now nothing happens with roomName.
                 }

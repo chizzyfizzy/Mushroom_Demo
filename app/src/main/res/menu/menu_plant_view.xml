@@ -13,6 +13,18 @@
         android:id = "@+id/createPlant"
         android:title = "Create New Plant"
         />
+
+    <item
+        android:id="@+id/setFarm"
+        android:title="Create Farm"
+        />
+
+    <item
+        android:id="@+id/setCounts"
+        android:title="Set Farm Counts"
+        />
+
+
     <item
         android:id = "@+id/deleteData"
         android:title = "Erase All Data"

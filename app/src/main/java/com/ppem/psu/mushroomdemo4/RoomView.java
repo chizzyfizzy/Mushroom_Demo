@@ -3,6 +3,7 @@ package com.ppem.psu.mushroomdemo4;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.CursorJoiner;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -37,6 +38,7 @@ public class RoomView extends AppCompatActivity {
     private PlantDAO plantDataSource;
     private ChartDAO chartDataSource;
     private CellDAO cellDataSource;
+    private CountsDAO countDataSource;
 
 
     @Override
@@ -57,6 +59,9 @@ public class RoomView extends AppCompatActivity {
 
         cellDataSource = new CellDAO(this);
         cellDataSource.open();
+
+        countDataSource = new CountsDAO(this);
+        countDataSource.open();
 
 
         pName = (TextView) findViewById(R.id.plantNameTextRoomList);
@@ -214,6 +219,7 @@ public class RoomView extends AppCompatActivity {
         createBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                List<Count> tempCountList = countDataSource.getDistinctCounts();
                 int peakBool =  0; //Boolean stored as int because SQLite does not support boolean. Only integer true(1) or false(0).
                 //Check if any value is empty
                 if(roomName.getText().toString().isEmpty() || roomBedLevels.getText().toString().isEmpty()
@@ -222,6 +228,7 @@ public class RoomView extends AppCompatActivity {
                     errorToast.show();
                 }
                 else{
+
                     Toast waitToast = Toast.makeText(RoomView.this, "Please wait a few seconds for the Application to set up.", Toast.LENGTH_LONG);
                     waitToast.show();
                     if (roomPeak.isChecked()){
@@ -231,6 +238,14 @@ public class RoomView extends AppCompatActivity {
                         Room room = roomDataSource.createRoom(roomName.getText().toString() + " " + i, thePlantId);
                         chartDataSource.createChart(Integer.parseInt(roomBedLevels.getText().toString()), peakBool, Integer.parseInt(roomSquares.getText().toString()), room.getRoomId());
                         createCellListForRoom(Integer.parseInt(roomBedLevels.getText().toString()), Integer.parseInt(roomSquares.getText().toString()), room.getRoomId(), peakBool);
+
+                    }
+                    for(int j = 0; j < tempCountList.size(); j++) {
+                        int chartBool = 0;
+                        if(tempCountList.get(j).isInChart()){
+                            chartBool = 1;
+                        }
+                        countDataSource.createCountAllRooms(tempCountList.get(j).getCountName(), chartBool);
                     }
                     populateListView();
                     dialog.dismiss();
@@ -250,6 +265,7 @@ public class RoomView extends AppCompatActivity {
 
         dialog.show();
     }
+
 
     private void createCellListForRoom(int col, int row, long roomId, int peakBool){
         char bedIncrement = 'A';
