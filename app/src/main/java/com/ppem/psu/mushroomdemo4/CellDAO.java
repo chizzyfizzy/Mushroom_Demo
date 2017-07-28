@@ -18,7 +18,7 @@ public class CellDAO {
     //DB Fields
     private SQLiteDatabase database;
     private DatabaseHelper dbHelper;
-    private String[] allColumns = {DatabaseHelper.CELL_ID, DatabaseHelper.CELL_BED, DatabaseHelper.CELL_COLUMN, DatabaseHelper.CELL_ROW};
+    private String[] allColumns = {DatabaseHelper.CELL_ID, DatabaseHelper.CELL_COLUMN, DatabaseHelper.CELL_ROW};
 
     public CellDAO (Context context) {
         dbHelper = new DatabaseHelper(context);
@@ -34,10 +34,23 @@ public class CellDAO {
 
     public Cell createCell (String cellBed, int cellColumn, int cellRow, long roomId){
         ContentValues values = new ContentValues();
-        values.put(DatabaseHelper.CELL_BED, cellBed);
+       // values.put(DatabaseHelper.CELL_BED, cellBed);
         values.put(DatabaseHelper.CELL_COLUMN, cellColumn);
         values.put(DatabaseHelper.CELL_ROW, cellRow);
-        values.put(DatabaseHelper.FK_CELL_ROOM, roomId);
+        values.put(DatabaseHelper.FK_CELL_BED, roomId);
+        long insertId = database.insert(DatabaseHelper.TABLE_NAME_CELLS, null, values);
+        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_CELLS, allColumns, DatabaseHelper.CELL_ID + " = " + insertId, null, null, null, null);
+        cursor.moveToFirst();
+        Cell newCell = cursorToCell(cursor);
+        cursor.close();
+        return newCell;
+    }
+
+    public Cell createCellForBed(int cellCol, int cellRow, long bedId){
+        ContentValues values=  new ContentValues();
+        values.put(DatabaseHelper.CELL_COLUMN, cellCol);
+        values.put(DatabaseHelper.CELL_ROW, cellRow);
+        values.put(DatabaseHelper.FK_CELL_BED, bedId);
         long insertId = database.insert(DatabaseHelper.TABLE_NAME_CELLS, null, values);
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_CELLS, allColumns, DatabaseHelper.CELL_ID + " = " + insertId, null, null, null, null);
         cursor.moveToFirst();
@@ -55,7 +68,7 @@ public class CellDAO {
     public List<Cell> getAllCellsForRoom(long roomId) {
         List<Cell> cellList = new ArrayList<Cell>();
 
-        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_CELLS, allColumns, DatabaseHelper.FK_CELL_ROOM + " = " + roomId, null, null, null, null);
+        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_CELLS, allColumns, DatabaseHelper.FK_CELL_BED + " = " + roomId, null, null, null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
@@ -67,12 +80,11 @@ public class CellDAO {
         return cellList;
     }
 
-    public List<Cell> getCellsForRoomBed(long roomId, String bedName){
+    public List<Cell> getCellsForBed(long bedId){
         List<Cell> cellList = new ArrayList<Cell>();
 
         try {
-            Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_CELLS, allColumns, DatabaseHelper.CELL_BED + " = '" + bedName
-                    + "' AND " + DatabaseHelper.FK_CELL_ROOM + " = " + roomId, null, null, null, null);
+            Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_CELLS, allColumns, DatabaseHelper.FK_CELL_BED + " = " + bedId, null, null, null, null);
 
 
         cursor.moveToFirst();
@@ -103,8 +115,8 @@ public class CellDAO {
         return cellList;
     }
 
-    public void deleteCellsForRoom(long roomId){
-        database.delete(DatabaseHelper.TABLE_NAME_CELLS, DatabaseHelper.FK_CELL_ROOM + " = " + roomId, null);
+    public void deleteCellsForBed(long bedId){
+        database.delete(DatabaseHelper.TABLE_NAME_CELLS, DatabaseHelper.FK_CELL_BED + " = " + bedId, null);
 
     }
 
@@ -113,9 +125,8 @@ public class CellDAO {
     private Cell cursorToCell(Cursor cursor) {
         Cell cell = new Cell();
         cell.setCellId(cursor.getLong(0));
-        cell.setCellBed(cursor.getString(1));
-        cell.setCellColumn(cursor.getInt(2));
-        cell.setCellRow(cursor.getInt(3));
+        cell.setCellColumn(cursor.getInt(1));
+        cell.setCellRow(cursor.getInt(2));
         return cell;
     }
 

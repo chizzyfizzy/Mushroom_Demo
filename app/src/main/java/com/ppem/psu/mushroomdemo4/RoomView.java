@@ -32,14 +32,12 @@ public class RoomView extends AppCompatActivity {
     private RoomListViewAdapter rAdapter;
     private List<Room> roomValues;
 
-
-
     private RoomDAO roomDataSource;
     private PlantDAO plantDataSource;
     private ChartDAO chartDataSource;
     private CellDAO cellDataSource;
     private CountsDAO countDataSource;
-
+    private BedDAO bedDataSource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,28 +45,28 @@ public class RoomView extends AppCompatActivity {
         setContentView(R.layout.activity_room_list_view);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         plantDataSource = new PlantDAO(this);
-        plantDataSource.open();
-
         roomDataSource = new RoomDAO(this);
-        roomDataSource.open();
-
         chartDataSource = new ChartDAO(this);
-        chartDataSource.open();
-
         cellDataSource = new CellDAO(this);
-        cellDataSource.open();
-
         countDataSource = new CountsDAO(this);
-        countDataSource.open();
+        bedDataSource = new BedDAO(this);
+    }
 
+    @Override
+    protected void onResume(){
+        super.onResume();
+        plantDataSource.open();
+        roomDataSource.open();
+        chartDataSource.open();
+        cellDataSource.open();
+        countDataSource.open();
+        bedDataSource.open();
 
         pName = (TextView) findViewById(R.id.plantNameTextRoomList);
         pLabel = (TextView) findViewById(R.id.plantLabelTextROomListView);
         pName.setText(thePlantName);
         pLabel.setText(thePlantLabel);
-
 
         populateListView();
 
@@ -87,7 +85,17 @@ public class RoomView extends AppCompatActivity {
             }
         });
 
+    }
 
+    @Override
+    protected void onPause(){
+        super.onPause();
+        plantDataSource.close();
+        roomDataSource.close();
+        chartDataSource.close();
+        cellDataSource.close();
+        countDataSource.close();
+        bedDataSource.close();
     }
 
     //Fills list with room items
@@ -187,7 +195,7 @@ public class RoomView extends AppCompatActivity {
         //TODO Create custom dialog xml
         //create a new room handler
         if(id == R.id.createRoom){
-            createRoomDialog();
+            createRoomsDialog();
         }
 
         //TODO add delete option with confirmation message
@@ -206,7 +214,7 @@ public class RoomView extends AppCompatActivity {
         thePlantLabel = thePlant.getPlantLabel();
     }
 
-    private void createRoomDialog(){
+    private void createRoomsDialog(){
         final Dialog dialog = new Dialog(RoomView.this);
         dialog.setContentView(R.layout.create_room_dialog);
         final EditText roomName = (EditText) dialog.findViewById(R.id.roomNameEditText);
@@ -219,33 +227,51 @@ public class RoomView extends AppCompatActivity {
         createBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                int bLevels = Integer.parseInt(roomBedLevels.getText().toString());
+                int bSqaures = Integer.parseInt(roomSquares.getText().toString());
                 List<Count> tempCountList = countDataSource.getDistinctCounts();
-                int peakBool =  0; //Boolean stored as int because SQLite does not support boolean. Only integer true(1) or false(0).
-                //Check if any value is empty
+
                 if(roomName.getText().toString().isEmpty() || roomBedLevels.getText().toString().isEmpty()
                         || roomSquares.getText().toString().isEmpty() || roomNumber.getText().toString().isEmpty()){
                     Toast errorToast = Toast.makeText(RoomView.this, "Error: Not All Fields Filled. ", Toast.LENGTH_LONG);
                     errorToast.show();
                 }
                 else{
-
                     Toast waitToast = Toast.makeText(RoomView.this, "Please wait a few seconds for the Application to set up.", Toast.LENGTH_LONG);
                     waitToast.show();
-                    if (roomPeak.isChecked()){
-                        peakBool = 1;
-                    }
-                    for(int i = 1; i < Integer.parseInt(roomNumber.getText().toString()) + 1; i++){
+                    //Create # of Rooms Loop
+                    for (int i = 1; i < Integer.parseInt(roomNumber.getText().toString()) + 1; i++){
                         Room room = roomDataSource.createRoom(roomName.getText().toString() + " " + i, thePlantId);
-                        chartDataSource.createChart(Integer.parseInt(roomBedLevels.getText().toString()), peakBool, Integer.parseInt(roomSquares.getText().toString()), room.getRoomId());
-                        createCellListForRoom(Integer.parseInt(roomBedLevels.getText().toString()), Integer.parseInt(roomSquares.getText().toString()), room.getRoomId(), peakBool);
-
+                        //Create 4 default beds loop - Chart Increment to add A/B/C/D
+                        char bedIncrement = 'A';
+                        for(int j = 0; j < 4; j++){
+                            //Add another level to bed C+D if room is peaked
+                            if(roomPeak.isChecked() && (j == 1 || j == 2)){
+                                bLevels += 1;
+                            }
+                            Bed bed = bedDataSource.createBed("Bed " + String.valueOf(bedIncrement), bLevels, bSqaures, room.getRoomId());
+                            //Create cells for bed: Fills grid horizontally so it needs a magical loop to fill it vertically.
+                            for (int r = 1; r < bSqaures + 1; r++) {
+                                for (int c = 1; c < bLevels + 1; c++) {
+                                    if (c * bSqaures + r >= bLevels) {
+                                        cellDataSource.createCellForBed(c, r, bed.getBedId());
+                                    } else {
+                                        cellDataSource.createCellForBed(c, r, bed.getBedId());
+                                    }
+                                }
+                            }
+                            bLevels = Integer.parseInt(roomBedLevels.getText().toString()); //Reset Bed levels incase it was added for peak.
+                            bedIncrement++;
+                        }
                     }
+                    //Should just include in loop, and make it Create Count with roomId
+                    //Add counts that are already set to the room.
                     for(int j = 0; j < tempCountList.size(); j++) {
                         int chartBool = 0;
                         if(tempCountList.get(j).isInChart()){
                             chartBool = 1;
                         }
-                        countDataSource.createCountAllRooms(tempCountList.get(j).getCountName(), chartBool);
+                        countDataSource.createCountAllRooms(tempCountList.get(j).getCountName(), chartBool); //Should change to just pass the count.
                     }
                     populateListView();
                     dialog.dismiss();
@@ -266,31 +292,6 @@ public class RoomView extends AppCompatActivity {
         dialog.show();
     }
 
-
-    private void createCellListForRoom(int col, int row, long roomId, int peakBool){
-        char bedIncrement = 'A';
-        int peak;
-        for (int n = 0; n < 4; n++) {
-            if((peakBool == 1) && (n == 1 || n == 2)) {
-                peak = 2;
-            }
-            else {
-                peak = 1;
-            }
-            for (int i = 1; i < row + 1; i++) {
-                for (int j = 1; j < col + peak; j++) {
-                    if (j * row + i >= col) {
-                        //label = String.valueOf(j) + "(" + String.valueOf(i) + ")";
-                        cellDataSource.createCell(String.valueOf(bedIncrement), j, i, roomId);
-                    } else {
-                        //label = String.valueOf(j) + "(" + String.valueOf(i * rowNum + i);
-                        cellDataSource.createCell(String.valueOf(bedIncrement), j, i, roomId);
-                    }
-                }
-            }
-            bedIncrement++;
-        }
-    }
 
 
 

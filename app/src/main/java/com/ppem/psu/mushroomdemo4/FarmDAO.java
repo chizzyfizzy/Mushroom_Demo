@@ -66,14 +66,14 @@ public class FarmDAO {
     }
 
     public Farm getSpecificFarm(long id){
-
         dbHelper.getReadableDatabase();
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_FARMS, allColumns, DatabaseHelper.FARM_ID + " = " + id, null, null, null,null);
-
-        cursor.moveToFirst();
-        Farm farm = cursorToFarm(cursor);
-
-        return farm;
+        if(cursor.getCount() != 0) {
+            cursor.moveToFirst();
+            Farm farm = cursorToFarm(cursor);
+            return farm;
+        }
+        else{ return null;}
     }
 
     private Farm cursorToFarm(Cursor cursor) {
@@ -81,7 +81,7 @@ public class FarmDAO {
         farm.setFarmId(cursor.getLong(0));
         farm.setFarmName(cursor.getString(1));
         farm.setFarmDescription(cursor.getString(2));
-        System.out.println("Setting Farm " + cursor.getString(1) +" " +  cursor.getString(2));
+        System.out.println("Setting Farm " + cursor.getString(1) + " " + cursor.getString(2));
         return farm;
     }
 

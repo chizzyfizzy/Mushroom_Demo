@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
@@ -30,6 +31,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,22 +52,33 @@ import java.util.List;
     //On first creating app, ask FARM NAME(add to dbhelper) -> Number of PLANTS -> NAME OF PLANTS (HOUSES/PLANTS/BUILDINGS) -> NAME OF ROOMS(ROOM/Double/Single)
                 //Does ALL except ask on first time opening app (doesn't matter too much)
     //Add option to add label (organic/mushroom type/ etc) to any plant or room
-    //FIX counts adding to database
-                //FIXED
-                //Create Counts after creating farm specs. But how add roomId?
+                //DONE
     //Add all CRUD for every table
-    //Create dialog menu for each dialog option
+    //Add Bed Table in DatabaseHelper
+    //Create dialog menu for each dialog option (maybe)
                 //Farm & room dialog done.
-    //Try an expandable list view with PLant-> room? Last
+    //Try an expandable list view with PLant-> room?
     //Add dates to counts
     //CRUD gridview cells with counts.
-    //Combine counts + gridview cells into one table.
-            //Selected counts can be added to cell. Figure out how to handle cell+count data (cell's have multiple counts at once).
-            //Figure out how to display multiple counts in one cell.
+        //Currently changes background color. Inserts new count-cell entity. Nothing else.
+        //Selected counts can be added to cell. Figure out how to handle cell+count data (cell's have multiple counts at once, and vice-versa).
+        //Figure out how to display multiple counts in one cell. (String array[] = (cellPosition, String counts))????
     //Put all hard coded strings into strings value list
     //JSON
     //Add count TYPE table (number, string, boolean, temp, date
-//TODO List -----------------------------------------------
+    //When creating a new chart(or any object for boolean), have the DAO convert the boolean to an int if inserting to SQLITE. (Doesn't matter if just switching data storage.)
+    //FarmCountsView activity needs to update counts in the rooms after add/update/delete somehow, if rooms are already set up.
+    //Get rid of a lot of menu options for each activity
+    //Add some sort of tutorial/FAQ page on how to do things for now?
+    //CODE: add comments to explain things. Make code more consistent. Make it look nicer basically.
+    //More constructors for model classes
+    //Probably create fragments out some views instead of just an activity except for charts?
+    //Farm List Dialog for when user wants to switch to another farm.
+    //Should databases open/close for each individual transaction?
+    //If another person reads this. I'd probably create your own chart-view (gridview) setup so that:
+        //A) you know what the f I was trying to do.
+        //B) you might find/know a better way.
+//TODO List ----------------------------------------------- By Mitch, For Mitch
 
 
 public class MainActivity extends AppCompatActivity {
@@ -81,6 +94,10 @@ public class MainActivity extends AppCompatActivity {
     private List<Plant> plantValues;
     private long farmId;
     private long sharedPrefFarmId = 1;
+    private final String sharedPrefName = "AppPreferences";
+    private Farm farm;
+    SharedPreferences prefs;
+    FarmListAdapter fAdapter;
 
 
     @Override
@@ -93,18 +110,30 @@ public class MainActivity extends AppCompatActivity {
         plantDataSource = new PlantDAO(this);
         roomDataSource = new RoomDAO(this);
         countDataSource = new CountsDAO(this);
+
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
         farmDataSource.open();
         plantDataSource.open();
-        //Farm farm = farmDataSource.getSpecificFarm(sharedPrefFarmId);
-        Farm farm = farmDataSource.getAllFarms().get(0);
-        farmId = farm.getFarmId();
+        prefs = getSharedPreferences(sharedPrefName, MODE_PRIVATE);
+        farmId = prefs.getLong("FarmId", -1);
+        if(farmId == -1){
+            createFarmDialog();
+        } else if(farmDataSource.getSpecificFarm(farmId) == null) {
+            createFarmDialog();
+        }
+        else {
+            Farm farm = farmDataSource.getSpecificFarm(farmId);
+            farmName = (TextView) findViewById(R.id.farmNameText);
+            farmName.setText(farm.getFarmName());
+        }
         plantValues = plantDataSource.getAllPlantsForFarm(farmId);
         pAdapter = new PlantListViewAdapter(this, plantValues);
         plantLV = (ListView) findViewById(R.id.plantListView);
         plantLV.setAdapter(pAdapter);
-
-        farmName = (TextView) findViewById(R.id.farmNameText) ;
-        farmName.setText(farm.getFarmName());
 
         //list item click handler
         plantLV = (ListView) findViewById(R.id.plantListView);
@@ -121,7 +150,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
 
+    @Override
+    protected void onPause(){
+        super.onPause();
+        farmDataSource.close();
+        plantDataSource.close();
     }
 
     //Context menu on long button click (User holds selection on list item)
@@ -143,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
         switch(item.getItemId()){
             case R.id.add:
                 Toast.makeText(MainActivity.this, "Add Plant Option selected", Toast.LENGTH_SHORT).show();
+                createPlantDialog();
                 return true;
 
             case R.id.edit:
@@ -239,14 +275,13 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+
+        if(id == R.id.changeFarm){
+            changeFarmDialog();
+            refreshView();
+        }
         return super.onOptionsItemSelected(item);
     }
-
-
-    //populates list view with data from sqlite
-/*    private void populateListView() {
-
-    }*/
 
     //TODO Create custom dialog xml
     //Create Plant Menu Option Selected
@@ -286,6 +321,35 @@ public class MainActivity extends AppCompatActivity {
         a.show();
     }
 
+    private void changeFarmDialog(){
+        //setContentView(R.layout.change_farm_dialog);
+        final Dialog dialog = new Dialog(MainActivity.this);
+        dialog.setContentView(R.layout.change_farm_dialog);
+        final List<Farm> allFarms = farmDataSource.getAllFarms();
+        ListView farmLV = (ListView) findViewById(R.id.farmListDialog) ;
+        fAdapter = new FarmListAdapter(this, allFarms);
+        farmLV.setAdapter(fAdapter);
+
+        farmLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                farm = allFarms.get(position);
+                farmId = farm.getFarmId();
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putLong("FarmId",farmId);
+                editor.apply();
+                plantValues = plantDataSource.getAllPlantsForFarm(farmId);
+                pAdapter.notifyDataSetChanged();
+
+
+
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+        refreshView();
+    }
+
     private void createFarmDialog(){
         final Dialog dialog = new Dialog(MainActivity.this);
         dialog.setContentView(R.layout.create_farm_dialog);
@@ -305,13 +369,17 @@ public class MainActivity extends AppCompatActivity {
                     errorToast.show();
                 }
                 else{
-                    Farm farm = farmDataSource.createFarm(farmName.getText().toString(), farmDescr.getText().toString());
+                    farm = farmDataSource.createFarm(farmName.getText().toString(), farmDescr.getText().toString());
+                    farmId = farm.getFarmId();
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putLong("FarmId",farmId);
+                    editor.apply();
                     farmName.setText(farmName.getText().toString());
                     for(int i = 1; i < Integer.parseInt(buildingNumber.getText().toString()) + 1; i++){
                         plantDataSource.createPlantsForFarm(buildingName.getText().toString() + " " + i, farm.getFarmId());
                     }
-                   // populateListView();
                     dialog.dismiss();
+                    refreshView();
                     //TODO add room/farm/plant names to sharedpreferences. For now nothing happens with roomName.
                 }
 
@@ -329,15 +397,13 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-
-    private void setCountsFragment(){
-
+    private void refreshView(){
+        plantValues = plantDataSource.getAllPlantsForFarm(farmId);
+        pAdapter.notifyDataSetChanged();
     }
 
-
-
-
     //Tried using openCSV jar, not compatable with sqlite.
+    //Try to make this a separate class
     private class ExportDatabaseCSVTask extends AsyncTask<String, Void, Boolean> { //TODO make this it's own class (problem with toasts needing activity context)
         // Storage Permissions
         private static final int REQUEST_EXTERNAL_STORAGE = 1;

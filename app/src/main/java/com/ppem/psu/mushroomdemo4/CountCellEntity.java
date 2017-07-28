@@ -11,6 +11,8 @@ public class CountCellEntity {
     private Count count;
     private Cell cell;
     private ArrayList<CountCellEntity> ccList;
+    private long countId;
+    private long cellId;
 
     public CountCellEntity(){
 
@@ -43,6 +45,22 @@ public class CountCellEntity {
 
     public void setCell(Cell cell) {
         this.cell = cell;
+    }
+
+    public long getCountId() {
+        return countId;
+    }
+
+    public void setCountId(long countId) {
+        this.countId = countId;
+    }
+
+    public long getCellId() {
+        return cellId;
+    }
+
+    public void setCellId(long cellId) {
+        this.cellId = cellId;
     }
 
     public ArrayList<CountCellEntity> getCcList() {

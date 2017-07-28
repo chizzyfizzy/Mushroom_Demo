@@ -17,11 +17,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "farm.db";
 
     //Increment for every change in database structure.
-    public static final int DATABASE_VERSION = 30;
+    public static final int DATABASE_VERSION = 35;
 
     //Farm Table
     public static final String TABLE_NAME_FARMS = "Farms";
-    public static final String FARM_ID = "_id";
+    public static final String FARM_ID = "f_id";
     public static final String FARM_NAME = "farmName";
     public static final String FARM_DESCRIPTION = "farmDescr";
     //Create Farms Table Statement
@@ -33,7 +33,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //Plants Table
     public static final String TABLE_NAME_PLANTS = "Plants";
-    public static final String PLANT_ID = "_id";
+    public static final String PLANT_ID = "p_id";
     public static final String PLANT_NAME = "plantName";
     public static final String PLANT_LABEL = "plantLabel";
     public static final String FK_PLANT_FARM = "farmId";
@@ -50,7 +50,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //Rooms Table
     public static final String TABLE_NAME_ROOMS = "Rooms";
-    public static final String ROOM_ID = "_id";
+    public static final String ROOM_ID = "r_id";
     public static final String ROOM_NAME = "roomName";
     public static final String ROOM_LABEL = "roomLabel";
     public static final String FK_PLANT_ID = "plantID";
@@ -67,7 +67,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //Counts Table
     public static final String TABLE_NAME_COUNTS = "Counts";
-    public static final String COUNT_ID = "_id";
+    public static final String COUNT_ID = "co_id";
     public static final String COUNT_NAME = "countName";
     public static final String COUNT_NUMBER = "countNum";
     public static final String COUNT_CREATED_AT = "countDate";
@@ -88,7 +88,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //Charts Table
     public static final String TABLE_NAME_CHARTS = "Charts";
-    public static final String CHART_ID = "_id";
+    public static final String CHART_ID = "ch_id";
     public static final String CHART_COL_NUM = "colNum";
     public static final String CHART_ROW_NUM = "rowNum";
     public static final String CHART_BED_PEAK= "bedPeak";
@@ -103,43 +103,60 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + " FOREIGN KEY (" + FK_CHART_ROOM + ") REFERENCES " + TABLE_NAME_ROOMS + " (" + ROOM_ID + ")"
             + ");";
 
+    //Bed Table
+    public static final String TABLE_NAME_BEDS = "Beds";
+    public static final String BED_ID = "b_id";
+    public static final String BED_NAME = "bedName";
+    public static final String BED_LEVELS = "bedLevels";
+    public static final String BED_SQUARES = "bedSquares";
+    public static final String FK_BED_ROOM = "roomID";
+    //Create Beds Table Statement
+    private static final String CREATE_TABLE_BEDS = "CREATE TABLE " + TABLE_NAME_BEDS + " ( "
+            + BED_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + BED_NAME + " TEXT NOT NULL, "
+            + BED_LEVELS + " INTEGER NOT NULL, "
+            + BED_SQUARES + " INTEGER NOT NULL, "
+            + FK_CHART_ROOM + " INTEGER NOT NULL, "
+            + " FOREIGN KEY (" + FK_CHART_ROOM + ") REFERENCES " + TABLE_NAME_ROOMS + " (" + ROOM_ID + ")"
+            + ");";
 
-    //Cell / Squares Table
+
+
+    //Cell or Squares Table
     public static final String TABLE_NAME_CELLS = "Cells";
-    public static final String CELL_ID = "_id";
-    public static final String CELL_BED = "cellBed";
+    public static final String CELL_ID = "ce_id";
+    //public static final String CELL_BED = "cellBed";
     public static final String CELL_COLUMN = "cellColumn";
     public static final String CELL_ROW = "cellRow";
-    public static final String FK_CELL_ROOM = "roomId";
+    public static final String FK_CELL_BED = "bedId";
     //Create Cell Table Statement
     private static final String CREATE_TABLE_CELLS = "CREATE TABLE " + TABLE_NAME_CELLS + " ( "
             + CELL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + CELL_BED + " STRING NOT NULL, "
+       //     + CELL_BED + " STRING NOT NULL, "
             + CELL_COLUMN + " INTEGER NOT NULL, "
             + CELL_ROW + " INTEGER NOT NULL, "
-            + FK_CELL_ROOM + " INTEGER NOT NULL, "
-            + " FOREIGN KEY (" + FK_CHART_ROOM + ") REFERENCES " + TABLE_NAME_ROOMS + " (" + ROOM_ID + ")"
+            + FK_CELL_BED + " INTEGER NOT NULL, "
+            + " FOREIGN KEY (" + FK_CELL_BED + ") REFERENCES " + TABLE_NAME_BEDS + " (" + BED_ID + ")"
             + ");";
 
     //Counts & Cells Table
     public static final String TABLE_NAME_COUNT_CELLS = "CountCells";
-    public static final String COUNT_CELL_ID = "countCellId";
+    public static final String COUNT_CELL_ID = "cc_Id";
     public static final String PR_COUNT_ID = "countId";
     public static final String PR_CELL_ID = "cellId";
-    public static final String FK_ROOM_COUNT_CELL = "roomId";
+    public static final String FK_BED_COUNT_CELL = "bedId";
     //Create Count & Cells Table
     private static final String CREATE_TABLE_COUNT_CELLS = "CREATE TABLE " + TABLE_NAME_COUNT_CELLS + " ( "
             + COUNT_CELL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + PR_COUNT_ID + " INTEGER NOT NULL, "
             + PR_CELL_ID + " INTEGER NOT NULL, "
-            + FK_ROOM_COUNT_CELL +  " INTEGER NOT NULL, "
+            + FK_BED_COUNT_CELL +  " INTEGER NOT NULL, "
             + " FOREIGN KEY (" + PR_COUNT_ID + ") REFERENCES " + TABLE_NAME_COUNTS + " (" + COUNT_ID + ")"
             + " FOREIGN KEY (" + PR_CELL_ID + ") REFERENCES " + TABLE_NAME_CELLS + " (" + CELL_ID + "), "
-            + " FOREIGN KEy (" + FK_ROOM_COUNT_CELL + ") REFERENCES " + TABLE_NAME_ROOMS + " (" + ROOM_ID + ") "
+            + " FOREIGN KEY (" + FK_BED_COUNT_CELL + ") REFERENCES " + TABLE_NAME_BEDS + " (" + BED_ID + ") "
             + ");";
 
     //TODO Add a Count Weekly Total Table? Just add Weekly variable to Count Table (After adding in date functionality)?
-    //TODO Add a cell/square Table? Prob not because if exporting to excel then would just print gridview cells with for loops again. Unless
 
 
 
@@ -153,6 +170,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         database.execSQL(CREATE_TABLE_PLANTS);
         database.execSQL(CREATE_TABLE_ROOMS);
         database.execSQL(CREATE_TABLE_CHARTS);
+        database.execSQL(CREATE_TABLE_BEDS);
         database.execSQL(CREATE_TABLE_COUNTS);
         database.execSQL(CREATE_TABLE_CELLS);
         database.execSQL(CREATE_TABLE_COUNT_CELLS);
@@ -166,6 +184,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_PLANTS );
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_ROOMS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_CHARTS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_BEDS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_COUNTS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_CELLS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_COUNT_CELLS);

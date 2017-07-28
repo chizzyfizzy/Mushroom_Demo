@@ -5,9 +5,16 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewPager;
+import android.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,18 +23,27 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ChartView2 extends AppCompatActivity {
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private ChartDAO chartDataSource;
+    private BedDAO bedDataSource;
     private CellDAO cellDataSource;
+    private CountsDAO countsDataSource;
     private Toolbar toolbar;
     private long roomId;
     private Chart chart;
     private int chartCol, chartRow;
+    private List<Bed> bedList;
+    public Bed bed;
+    public List<Count> countList;
     Bundle bundleA, bundleB, bundleC, bundleD;
 
-    //TODO Add Bed Peak Level to creating cells method
+    private FragmentPagerAdapter smartAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,70 +54,150 @@ public class ChartView2 extends AppCompatActivity {
 
         chartDataSource = new ChartDAO(this);
         chartDataSource.open();
+        countsDataSource = new CountsDAO(this);
+        countsDataSource.open();
+        countList = countsDataSource.getChartCounts(roomId);
         cellDataSource = new CellDAO(this);
         cellDataSource.open();
+        bedDataSource = new BedDAO(this);
+        bedDataSource.open();
+        bedList = bedDataSource.getBedsForRoom(roomId);
         chart = chartDataSource.getChartForRoom(roomId);
         chartCol = chart.getColNum();
         chartRow = chart.getRowNum();
-
-
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
+
         //Keeps cells highlight after switching tabs
-        viewPager.setOffscreenPageLimit(4);
         setupViewPager(viewPager);
+        //viewPager.setOffscreenPageLimit(4);
 
-        tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
+    }
 
-        if(chart == null){
-            createChartDialog();
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if ((keyCode == KeyEvent.KEYCODE_BACK))
+        {
+            finish();
+            chartDataSource.close();
+            countsDataSource.close();
+            cellDataSource.close();
+            bedDataSource.close();
         }
+        return super.onKeyDown(keyCode, event);
     }
 
     private void setupViewPager(ViewPager viewPager) {
         //TODO Peaked room doesn't seem to add another column
+        //TabPageAdapter adapter = new TabPageAdapter(getSupportFragmentManager());
+        final ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+
+        for(int i = 0; i < bedList.size(); i++){
+            ChartFragment frag = new ChartFragment();
+            Bundle b = new Bundle();
+            b.putLong("room", roomId);
+            b.putInt("level",bedList.get(i).getBedLevels());
+            b.putLong("bed", bedList.get(i).getBedId());
+            b.putString("name",bedList.get(i).getBedName());
+            frag.setArguments(b);
+            adapter.addFragment(frag, bedList.get(i).getBedName());
+        }
+/*
+        BedA fragA = new BedA();
         bundleA = new Bundle();
         bundleA.putLong("room",roomId);
-        bundleA.putInt("column",chartCol);
-        bundleA.putString("bed", "A");
-        TabPageAdapter adapter = new TabPageAdapter(getSupportFragmentManager());
-
-        char bedIncrement = 'A';
-        Bundle bundle = new Bundle();
-        bundle.putLong("room",roomId);
-        for(int i = 0; i < 4; i++){
-            if((chart.getBedPeak()) && (i == 1 || i == 2)) {
-                bundle.putInt("column", chartCol + 1);
-            }
-            else {
-                bundle.putInt("column", chartCol);
-            }
-            bundle.putString("bed", String.valueOf(bedIncrement));
-            ChartFragment fragment = new ChartFragment();
-            fragment.setArguments(bundle);
-            adapter.addFragment(fragment, "BED " + String.valueOf(bedIncrement));
-            bedIncrement++;
-        }
-
-        /*
-        ChartFragment fragA = new ChartFragment();
+        bundleA.putInt("column",bedList.get(0).getBedLevels());
+        bundleA.putLong("bed", bedList.get(0).getBedId());
         fragA.setArguments(bundleA);
         adapter.addFragment(fragA, "BED A");
 
-        fragA = new ChartFragment();
-        bundleA.putString("bed", "B");
-        fragA.setArguments(bundleA);
-        adapter.addFragment(fragA, "BED B");
+        BedB fragB = new BedB();
+        bundleB = new Bundle();
+        bundleB.putLong("room", roomId);
+        bundleB.putLong("bed", bedList.get(1).getBedId());
+        bundleB.putInt("column", bedList.get(1).getBedLevels());
+        fragB.setArguments(bundleB);
+        adapter.addFragment(fragB, "BED B");
+
+        BedC fragC = new BedC();
+        bundleC = new Bundle();
+        bundleC.putLong("room", roomId);
+        bundleC.putLong("bed", bedList.get(2).getBedId());
+        bundleC.putInt("column", bedList.get(2).getBedLevels());
+        fragC.setArguments(bundleC);
+        adapter.addFragment(fragC, "BED C");
+
+        BedD fragD = new BedD();
+        bundleD = new Bundle();
+        bundleD.putLong("room", roomId);
+        bundleD.putLong("bed", bedList.get(3).getBedId());
+        bundleD.putInt("column", bedList.get(3).getBedLevels());
+        fragD.setArguments(bundleD);
+        adapter.addFragment(fragD, "BED D");
 */
 
-
-
         viewPager.setAdapter(adapter);
+        tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(viewPager);
+
+
+        viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                bed = bedList.get(position);
+                adapter.getItem(position).updateChart();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+    }
+
+    class ViewPagerAdapter extends FragmentStatePagerAdapter {
+        private final List<ChartFragment> fragList = new ArrayList<>();
+        private final List<String> fragTitleList = new ArrayList<>();
+
+        public ViewPagerAdapter(FragmentManager manager) {
+            super(manager);
+        }
+
+
+        @Override
+        public ChartFragment getItem(int position) {
+            return fragList.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return fragList.size();
+        }
+
+        public void addFragment(ChartFragment fragment, String title) {
+            fragList.add(fragment);
+            fragTitleList.add(title);
+        }
+
+        @Override
+        public int getItemPosition(Object object) {
+            return super.getItemPosition(object);
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return fragTitleList.get(position);
+        }
     }
 
 
@@ -136,7 +232,7 @@ public class ChartView2 extends AppCompatActivity {
         }
         if(id == R.id.deleteAllCharts){
             chartDataSource.deleteAllCharts();
-            cellDataSource.deleteCellsForRoom(roomId);
+           // cellDataSource.deleteCellsForRoom(roomId);
         }
 
         return super.onOptionsItemSelected(item);
