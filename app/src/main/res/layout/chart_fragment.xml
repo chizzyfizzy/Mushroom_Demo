@@ -9,18 +9,18 @@
     <GridView
         android:id="@+id/chartGridView"
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="match_parent"
 
+        android:layout_above="@+id/saveGridDataButton"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/countSpinner"
         android:columnWidth="40dp"
         android:horizontalSpacing="10dp"
         android:numColumns="3"
         android:verticalSpacing="5dp"
         tools:layout_editor_absoluteX="-238dp"
-        tools:layout_editor_absoluteY="129dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_above="@+id/saveGridDataButton"
-        android:layout_below="@+id/countSpinner" />
+        tools:layout_editor_absoluteY="129dp" />
 
     <TextView
         android:id="@+id/textView2"
@@ -45,17 +45,6 @@
         android:textColor="@android:color/background_dark"
         android:textSize="14sp" />
 
-
-    <Button
-        android:id="@+id/saveGridDataButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentStart="true"
-        android:text="Save DAta" />
 
     <Spinner
         android:id="@+id/countSpinner"
