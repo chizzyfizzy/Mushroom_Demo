@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.ppem.psu.mushroomdemo4.CountView"
+    tools:context="com.ppem.psu.mushroomdemo4.Interface.CountView"
     tools:showIn="@layout/activity_count_list_view">
 
 </RelativeLayout>

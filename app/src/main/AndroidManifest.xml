@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".Interface.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -23,23 +23,23 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".RoomView"
+            android:name=".Interface.RoomView"
             android:label="@string/title_activity_room_list_view"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".Interface.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.ppem.psu.mushroomdemo4.MainActivity" />
+                android:value="com.ppem.psu.mushroomdemo4.Interface.MainActivity" />
         </activity>
         <activity
-            android:name=".CountView"
+            android:name=".Interface.CountView"
             android:label="@string/title_activity_count_list_view"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ChartView2"
+            android:name=".Interface.ChartView2"
             android:label="@string/title_activity_chart_view2"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".FarmCountsView"></activity>
+        <activity android:name=".Interface.FarmCountsView"></activity>
     </application>
 
 </manifest>

@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:id="@+id/linLayout1"
     android:gravity="center"
-    tools:context="com.ppem.psu.mushroomdemo4.CountView">
+    tools:context="com.ppem.psu.mushroomdemo4.Interface.CountView">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"

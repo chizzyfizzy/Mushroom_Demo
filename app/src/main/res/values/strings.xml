@@ -7,6 +7,8 @@
     <string name="title_activity_chart_view">ChartView</string>
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="title_activity_chart_view1">ChartView1</string>
+    <string name="AppPreferences">AppPreferences</string>
+    <integer name="currentFarmId">0</integer>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

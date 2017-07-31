@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.ppem.psu.mushroomdemo4.MainActivity">
+    tools:context="com.ppem.psu.mushroomdemo4.Interface.MainActivity">
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
@@ -33,6 +33,11 @@
     <item
         android:id ="@+id/exportData"
         android:title = "Export Current Data"
+        />
+
+    <item
+        android:id ="@+id/changeFarm"
+        android:title = "Change Farm"
         />
 
 </menu>

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.ppem.psu.mushroomdemo4.RoomView"
+    tools:context="com.ppem.psu.mushroomdemo4.Interface.RoomView"
     tools:showIn="@layout/activity_room_list_view">
 
 </RelativeLayout>
