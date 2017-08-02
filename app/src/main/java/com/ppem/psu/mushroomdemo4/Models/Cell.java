@@ -13,7 +13,6 @@ public class Cell {
     private int cellColumn;
     private int cellRow;
     private List<Count> countListInCell = new ArrayList<>();
-    private String countString;
 
     public long getCellId() {
         return cellId;
@@ -60,11 +59,4 @@ public class Cell {
         this.countListInCell.add(count);
     }
 
-    public String getCountString() {
-        return countString;
-    }
-
-    public void setCountString(String countString) {
-        this.countString = countString;
-    }
 }

@@ -8,6 +8,10 @@
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="title_activity_chart_view1">ChartView1</string>
     <string name="AppPreferences">AppPreferences</string>
+    <string name="ChartBooleanQuestion">Use this measure on charts</string>
+    <string name="CopyCountAllRoomsQuestion">Copy To All Rooms and Plants</string>
+    <string name="CountColumnHeaderType">        Type        </string>
+    <string name="CountColumnHeaderNumber">       #       </string>
     <integer name="currentFarmId">0</integer>
 
     <!-- TODO: Remove or change this placeholder text -->

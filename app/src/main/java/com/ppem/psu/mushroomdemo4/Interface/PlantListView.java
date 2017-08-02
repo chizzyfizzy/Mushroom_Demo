@@ -32,10 +32,10 @@ import android.widget.Toast;
 
 
 import com.opencsv.CSVWriter;
-import com.ppem.psu.mushroomdemo4.Controllers.CountsDAO;
-import com.ppem.psu.mushroomdemo4.Controllers.FarmDAO;
-import com.ppem.psu.mushroomdemo4.Controllers.PlantDAO;
-import com.ppem.psu.mushroomdemo4.Controllers.RoomDAO;
+import com.ppem.psu.mushroomdemo4.DatabaseControllers.CountsDAO;
+import com.ppem.psu.mushroomdemo4.DatabaseControllers.FarmDAO;
+import com.ppem.psu.mushroomdemo4.DatabaseControllers.PlantDAO;
+import com.ppem.psu.mushroomdemo4.DatabaseControllers.RoomDAO;
 import com.ppem.psu.mushroomdemo4.Models.Count;
 import com.ppem.psu.mushroomdemo4.Models.Farm;
 import com.ppem.psu.mushroomdemo4.Models.Plant;
@@ -50,43 +50,30 @@ import java.util.List;
 
 
 //TODO List ---------------------------------------------
-    //On first creating app, ask FARM NAME(add to dbhelper) -> Number of PLANTS -> NAME OF PLANTS (HOUSES/PLANTS/BUILDINGS) -> NAME OF ROOMS(ROOM/Double/Single)
-                //Does ALL except ask on first time opening app (doesn't matter too much)
-    //Add option to add label (organic/mushroom type/ etc) to any plant or room
-                //DONE
     //Add all CRUD for every table
-    //Add Bed Table in DatabaseHelper
     //Create dialog menu for each dialog option (maybe)
                 //Farm & room dialog done.
     //Try an expandable list view with PLant-> room?
-    //Add dates to counts
-    //CRUD gridview cells with counts.
-        //Currently changes background color. Inserts new count-cell entity. Nothing else.
-        //Selected counts can be added to cell. Figure out how to handle cell+count data (cell's have multiple counts at once, and vice-versa).
-        //Figure out how to display multiple counts in one cell. (String array[] = (cellPosition, String counts))????
-    //Put all hard coded strings into strings value list
     //JSON
-    //Add count TYPE table (number, string, boolean, temp, date
-    //When creating a new chart(or any object for boolean), have the DAO convert the boolean to an int if inserting to SQLITE. (Doesn't matter if just switching data storage.)
-    //FarmCountsView activity needs to update counts in the rooms after add/update/delete somehow, if rooms are already set up.
-    //Get rid of a lot of menu options for each activity
+    //Add count TYPE table (water, temp, etc.,)
+    //Get rid of useless menu options for each activity
+    //Calendar and date functionalities. (I guess make a new count object for each date a room is edited?
+    //A room cycle feature, room mushroom type
+    //Weekly counts feature
+    //A list of cells with specific counts for room. (Reverse of getting counts for cell function) For exporting data.
+    //User Login to trace who edited what (save for amazon if I get there.)
+
+    //RoomListView CRUD is currently bugged**********
+
     //Add some sort of tutorial/FAQ page on how to do things for now?
-    //CODE: add comments to explain things. Make code more consistent. Make it look nicer basically.
-    //More constructors for model classes
     //Probably create fragments out some views instead of just an activity except for charts?
-    //Farm List Dialog for when user wants to switch to another farm.
-    //Should databases open/close for each individual transaction?
-    //If another person reads this. I'd probably create your own chart-view (gridview) setup so that:
-        //A) you know what the f I was trying to do.
-        //B) you might find/know a better way.
 //TODO List ----------------------------------------------- By Mitch, For Mitch
 
 
-public class MainActivity extends AppCompatActivity {
+public class PlantListView extends AppCompatActivity {
     ListView plantLV, farmLV;
-
     private PlantDAO plantDataSource;
-    //Get database sources for Exporting data
+    //Get all database sources for Exporting data
     RoomDAO roomDataSource;
     CountsDAO countDataSource;
     PlantListViewAdapter pAdapter;
@@ -103,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_plant_list_view);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         farmDataSource = new FarmDAO(this);
@@ -120,21 +107,20 @@ public class MainActivity extends AppCompatActivity {
         plantDataSource.open();
         prefs = getSharedPreferences(sharedPrefsName, MODE_PRIVATE);
         farmId = prefs.getLong("FarmId", -1);
+        farmName = (TextView) findViewById(R.id.farmNameText);
         if(farmId == -1){
             createFarmDialog();
         } else if(farmDataSource.getSpecificFarm(farmId) == null) {
             createFarmDialog();
         }
         else {
-            Farm farm = farmDataSource.getSpecificFarm(farmId);
-            farmName = (TextView) findViewById(R.id.farmNameText);
+            farm = farmDataSource.getSpecificFarm(farmId);
             farmName.setText(farm.getFarmName());
         }
         plantValues = plantDataSource.getAllPlantsForFarm(farmId);
         pAdapter = new PlantListViewAdapter(this, plantValues);
         plantLV = (ListView) findViewById(R.id.plantListView);
         plantLV.setAdapter(pAdapter);
-
         //list item click handler
         plantLV = (ListView) findViewById(R.id.plantListView);
         registerForContextMenu(plantLV);
@@ -142,9 +128,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Plant p = pAdapter.getItem(position);
-                RoomView room = new RoomView();
+                RoomListView room = new RoomListView();
                 room.setPlantInfo(p);
-                Intent openRoomListIntent = new Intent(MainActivity.this, RoomView.class);
+                Intent openRoomListIntent = new Intent(PlantListView.this, RoomListView.class);
                 startActivity(openRoomListIntent);
 
             }
@@ -153,8 +139,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop(){
-        super.onStop();
+    protected void onDestroy(){
+        super.onDestroy();
         farmDataSource.close();
         plantDataSource.close();
     }
@@ -177,35 +163,35 @@ public class MainActivity extends AppCompatActivity {
         final Plant plant = plantValues.get(info.position);
         switch(item.getItemId()){
             case R.id.add:
-                Toast.makeText(MainActivity.this, "Add Plant Option selected", Toast.LENGTH_SHORT).show();
+                Toast.makeText(PlantListView.this, "Add Plant Option selected", Toast.LENGTH_SHORT).show();
                 createPlantDialog();
                 return true;
 
             case R.id.edit:
-                Toast.makeText(MainActivity.this, "Edit Plant Option selected for " + plant.getPlantName(), Toast.LENGTH_SHORT).show();
-                AlertDialog.Builder alertBuilder = new AlertDialog.Builder(MainActivity.this);
+                Toast.makeText(PlantListView.this, "Edit Plant Option selected for " + plant.getPlantName(), Toast.LENGTH_SHORT).show();
+                AlertDialog.Builder alertBuilder = new AlertDialog.Builder(PlantListView.this);
                 alertBuilder.setTitle("Editing Plant: " + plant.getPlantName());
-                LinearLayout layout = new LinearLayout(MainActivity.this);
+                LinearLayout layout = new LinearLayout(PlantListView.this);
                 layout.setOrientation(LinearLayout.VERTICAL);
-                final EditText pName = new EditText(MainActivity.this);
+                final EditText pName = new EditText(PlantListView.this);
                 pName.setText(plant.getPlantName());
                 layout.addView(pName);
-                final EditText pLabel = new EditText(MainActivity.this);
-                if(plant.getPlantLabel().equals("")) {
+                final EditText pLabel = new EditText(PlantListView.this);
+                if(plant.getPlantLabel() == null || plant.getPlantLabel().equals("")) {
                     pLabel.setHint("Add Optional Label");
                 } else {pLabel.setText(plant.getPlantLabel()); }
-                    layout.addView(pLabel);
-                    alertBuilder.setView(layout);
-                    alertBuilder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            plantValues.set(info.position, new Plant(plant.getPlantId(), pName.getText().toString(),  pLabel.getText().toString()));
-                            pAdapter.notifyDataSetChanged();
-                            plantDataSource.updatePlant(pName.getText().toString(), pLabel.getText().toString(), plant.getPlantId());
-                        }
-                    });
-                    AlertDialog a = alertBuilder.create();
-                    a.show();
+                layout.addView(pLabel);
+                alertBuilder.setView(layout);
+                alertBuilder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        plantValues.set(info.position, new Plant(plant.getPlantId(), pName.getText().toString(),  pLabel.getText().toString()));
+                        pAdapter.notifyDataSetChanged();
+                        plantDataSource.updatePlant(pName.getText().toString(), pLabel.getText().toString(), plant.getPlantId());
+                    }
+                });
+                AlertDialog a = alertBuilder.create();
+                a.show();
 
                 return true;
 
@@ -219,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
                                 plantDataSource.deletePlant(plant);
                                 plantValues.remove(info.position);
                                 pAdapter.notifyDataSetChanged();
-                                Toast.makeText(MainActivity.this, "Deleted Plant " + plant.getPlantName(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(PlantListView.this, "Deleted Plant " + plant.getPlantName(), Toast.LENGTH_SHORT).show();
 
                             }})
                         .setNegativeButton("Cancel", null).show();
@@ -242,9 +228,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -252,25 +235,38 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
-        if(id == R.id.setFarm){
+        if(id == R.id.createFarm){
             createFarmDialog();
         }
 
         if(id == R.id.setCounts){
-            Intent openFarmCountsIntent = new Intent(MainActivity.this, FarmCountsView.class);
+            Intent openFarmCountsIntent = new Intent(PlantListView.this, FarmCountsView.class);
             openFarmCountsIntent.putExtra("farm",farmId);
             startActivity(openFarmCountsIntent);
         }
 
         //TODO add confirmation message.
-        if (id == R.id.deleteData) {
-            plantDataSource.deleteAllPlants();
-            pAdapter.notifyDataSetChanged();
+        if (id == R.id.deleteFarm) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Confirm")
+                    .setMessage("Delete " + farm.getFarmName() + "?")
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            farmDataSource.deleteFarm(farm);
+                            Toast.makeText(PlantListView.this, "Deleted farm " + farm.getFarmName(), Toast.LENGTH_SHORT).show();
+                            if(farmDataSource.getAllFarms().size() > 0){
+                                changeFarmDialog();
+                            }
+                            if(farmDataSource.getAllFarms().size() == 0){
+                                createFarmDialog();
+                            }
+                            refreshData();
+                        }})
+                    .setNegativeButton("Cancel", null).show();
         }
-
         if (id == R.id.exportData) {
             try {
-
                 roomDataSource.open();
                 countDataSource.open();
                 new ExportDatabaseCSVTask().execute("");
@@ -278,10 +274,10 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-
         if(id == R.id.changeFarm){
-            changeFarmDialog();
-            refreshView();
+            if(farmDataSource.getAllFarms().size() > 0){
+                changeFarmDialog();
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -289,21 +285,21 @@ public class MainActivity extends AppCompatActivity {
     //TODO Create custom dialog xml
     //Create Plant Menu Option Selected
     private void createPlantDialog(){
-        final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(MainActivity.this);
+        final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(PlantListView.this);
         alertBuilder.setTitle("Enter a Name & a Label(Optional)");
-        LinearLayout layout = new LinearLayout(MainActivity.this);
+        LinearLayout layout = new LinearLayout(PlantListView.this);
         layout.setOrientation(LinearLayout.VERTICAL);
-        final TextView nameLabel = new TextView(MainActivity.this);
+        final TextView nameLabel = new TextView(PlantListView.this);
         String nLabel = "Name: ";
         nameLabel.setText(nLabel);
         layout.addView(nameLabel);
-        final EditText pName = new EditText(MainActivity.this);
+        final EditText pName = new EditText(PlantListView.this);
         layout.addView(pName);
-        final TextView labelLabel = new TextView(MainActivity.this);
+        final TextView labelLabel = new TextView(PlantListView.this);
         String lLabel = "Label: ";
         labelLabel.setText(lLabel);
         layout.addView(labelLabel);
-        final EditText pLabel = new EditText(MainActivity.this);
+        final EditText pLabel = new EditText(PlantListView.this);
         layout.addView(pLabel);
 
         alertBuilder.setView(layout);
@@ -312,9 +308,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 if (!pName.getText().toString().isEmpty()) {
                     plantDataSource.createPlant(pName.getText().toString(), pLabel.getText().toString());
-                    //populateListView();
+                    refreshData();
                 } else {
-                    Toast errorToast = Toast.makeText(MainActivity.this, "Error, please enter a name for the new plant", Toast.LENGTH_LONG);
+                    Toast errorToast = Toast.makeText(PlantListView.this, "Error, please enter a name for the new plant", Toast.LENGTH_LONG);
                     errorToast.show();
                 }
             }
@@ -325,15 +321,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshData(){
+        farmName.setText(farm.getFarmName());
+        farmId = farm.getFarmId();
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putLong("FarmId",farmId);
+        editor.apply();
         plantValues = plantDataSource.getAllPlantsForFarm(farmId);
         pAdapter = new PlantListViewAdapter(this, plantValues);
         plantLV = (ListView) findViewById(R.id.plantListView);
         plantLV.setAdapter(pAdapter);
-
     }
 
     private void changeFarmDialog(){
-        final Dialog dialog = new Dialog(MainActivity.this);
+        final Dialog dialog = new Dialog(PlantListView.this);
         dialog.setContentView(R.layout.change_farm_dialog);
         final List<Farm> allFarms = farmDataSource.getAllFarms();
         farmLV = (ListView) dialog.findViewById(R.id.farmListDialog) ;
@@ -343,14 +343,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 dialog.dismiss();
-                refreshData();
                 farm = allFarms.get(position);
-                farmName.setText(farm.getFarmName());
-                farmId = farm.getFarmId();
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putLong("FarmId",farmId);
-                editor.apply();
-
+                refreshData();
             }
         });
         dialog.show();
@@ -358,7 +352,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createFarmDialog(){
-        final Dialog dialog = new Dialog(MainActivity.this);
+        final Dialog dialog = new Dialog(PlantListView.this);
         dialog.setContentView(R.layout.create_farm_dialog);
         final EditText farmName = (EditText) dialog.findViewById(R.id.farmNameEditText);
         final EditText buildingName = (EditText) dialog.findViewById(R.id.buildingNameEditText);
@@ -372,24 +366,18 @@ public class MainActivity extends AppCompatActivity {
                 //Check if any value is empty
                 if(farmName.getText().toString().isEmpty() || buildingName.getText().toString().isEmpty()
                         || buildingNumber.getText().toString().isEmpty() || roomName.getText().toString().isEmpty()){
-                    Toast errorToast = Toast.makeText(MainActivity.this, "Error: Not All Fields Filled. ", Toast.LENGTH_LONG);
+                    Toast errorToast = Toast.makeText(PlantListView.this, "Error: Not All Fields Filled. ", Toast.LENGTH_LONG);
                     errorToast.show();
                 }
                 else{
                     farm = farmDataSource.createFarm(farmName.getText().toString(), farmDescr.getText().toString());
-                    farmId = farm.getFarmId();
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putLong("FarmId",farmId);
-                    editor.apply();
-                    farmName.setText(farmName.getText().toString());
                     for(int i = 1; i < Integer.parseInt(buildingNumber.getText().toString()) + 1; i++){
                         plantDataSource.createPlantsForFarm(buildingName.getText().toString() + " " + i, farm.getFarmId());
                     }
                     dialog.dismiss();
-                    refreshView();
+                    refreshData();
                     //TODO add room/farm/plant names to sharedpreferences. For now nothing happens with roomName.
                 }
-
             }
         });
 
@@ -400,17 +388,12 @@ public class MainActivity extends AppCompatActivity {
                 dialog.dismiss();
             }
         });
-
         dialog.show();
     }
 
-    private void refreshView(){
-        plantValues = plantDataSource.getAllPlantsForFarm(farmId);
-        pAdapter.notifyDataSetChanged();
-    }
-
+    //Exporting current farm data
     //Tried using openCSV jar, not compatable with sqlite.
-    //Try to make this a separate class
+    //Should probably make this a separate class
     private class ExportDatabaseCSVTask extends AsyncTask<String, Void, Boolean> { //TODO make this it's own class (problem with toasts needing activity context)
         // Storage Permissions
         private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -426,7 +409,7 @@ public class MainActivity extends AppCompatActivity {
         SimpleDateFormat format = new SimpleDateFormat("MM-dd");
         Date date;
         String printDate;
-        private final ProgressDialog dialog = new ProgressDialog(MainActivity.this);
+        private final ProgressDialog dialog = new ProgressDialog(PlantListView.this);
 
         @Override
         protected void onPreExecute() {
@@ -444,7 +427,7 @@ public class MainActivity extends AppCompatActivity {
             }
             File file = new File(exportDir, "farmData.csv");
             try {
-                verifyStoragePermissions(MainActivity.this); //REQUIRED FOR API 23+ !!!!!! WILL NOT WORK WITHOUT
+                verifyStoragePermissions(PlantListView.this); //REQUIRED FOR API 23+ !!!!!! WILL NOT WORK WITHOUT
                 if(!file.exists()){
                     file.createNewFile();
                 }
@@ -466,9 +449,9 @@ public class MainActivity extends AppCompatActivity {
                         countList = countDataSource.getAllCountsForRoom(room.getRoomId());
                         //Count for Room Loop
                         for(Count count : countList) {
-                            date = new Date(count.getCountDate());
-                            printDate = format.format(date);
-                            String countString[] = {printDate, count.getCountName(), String.valueOf(count.getCountNumber())};
+                            //date = new Date(count.getCountDate());
+                          //  printDate = format.format(date);
+                            String countString[] = {/*printDate, */count.getCountName(), String.valueOf(count.getCountNumber())};
                             csvWrite.writeNext(countString);
 
                         }
@@ -479,10 +462,10 @@ public class MainActivity extends AppCompatActivity {
 
                 return true;
             } catch (Exception e) {
-                Log.e("MainActivity", e.getMessage(), e);
+                Log.e("PlantListView", e.getMessage(), e);
                 return false;
             } /*catch (IOException e) {
-                Log.e("MainActivity", e.getMessage(), e);
+                Log.e("PlantListView", e.getMessage(), e);
                 return false;
             }Don't Neeed maybe?*/
 
@@ -493,9 +476,9 @@ public class MainActivity extends AppCompatActivity {
                 this.dialog.dismiss();
             }
             if (success) {
-                Toast.makeText(MainActivity.this, "Export successful!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(PlantListView.this, "Export successful!", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(MainActivity.this, "Export failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(PlantListView.this, "Export failed", Toast.LENGTH_SHORT).show();
             }
         }
 

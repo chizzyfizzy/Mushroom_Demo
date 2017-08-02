@@ -1,4 +1,4 @@
-package com.ppem.psu.mushroomdemo4.Controllers;
+package com.ppem.psu.mushroomdemo4.DatabaseControllers;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -48,10 +48,10 @@ public class CountCellEntityDAO {
     }
 
 
-    public void deleteCountCell(long countId, long cellId, long roomId) {
+    public void deleteCountCell(long countId, long cellId, long bedId) {
         database.delete(DatabaseHelper.TABLE_NAME_COUNT_CELLS, DatabaseHelper.PR_COUNT_ID + " = " + countId + " AND "
                                                              + DatabaseHelper.PR_CELL_ID + " = " + cellId + " AND "
-                                                             + DatabaseHelper.FK_BED_COUNT_CELL + " = " + roomId, null);
+                                                             + DatabaseHelper.FK_BED_COUNT_CELL + " = " + bedId, null);
     }
 
     public List<CountCellEntity> getAllCountCellsBed(long bedId) {
@@ -121,7 +121,7 @@ public class CountCellEntityDAO {
         count.setCountId(cursor.getLong(0));
         count.setCountName(cursor.getString(1));
         count.setCountNumber(cursor.getInt(2));
-        count.setInChart(cursor.getInt(3));
+        count.setInChart(cursor.getInt(3) == 1);
 //        count.setCountDate(cursor.getInt(3));
         return count;
     }

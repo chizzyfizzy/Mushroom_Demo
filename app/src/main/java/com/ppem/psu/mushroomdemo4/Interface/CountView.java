@@ -24,8 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.ppem.psu.mushroomdemo4.Controllers.CountsDAO;
-import com.ppem.psu.mushroomdemo4.Controllers.DatabaseHelper;
+import com.ppem.psu.mushroomdemo4.DatabaseControllers.CountsDAO;
 import com.ppem.psu.mushroomdemo4.Models.Count;
 import com.ppem.psu.mushroomdemo4.Models.Room;
 import com.ppem.psu.mushroomdemo4.R;
@@ -39,7 +38,7 @@ import java.util.Locale;
 public class CountView extends AppCompatActivity {
 
     private TextView pName, rName, dateText;
-    private Button saveBtn, openChartButton;
+    private Button saveBtn, openChartButton, countHistory;
     private CountsDAO countDataSource;
     List<EditText> allCountsET;
     List<TextView> allCountNamesET;
@@ -48,9 +47,9 @@ public class CountView extends AppCompatActivity {
     TextView[] countNameTextArray;
     EditText[] countNumTextArray;
     TableRow[] rowArray;
-    //Only way to pass or keep room name/id for this activity
-    static String theRoomName;
-    static long theRoomId;
+    String theRoomName;
+    long theRoomId;
+    Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,18 +61,20 @@ public class CountView extends AppCompatActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
         //Define variables & simple get plant name for label
-        Intent intent = getIntent();
+        intent = getIntent();
         String sentPName = intent.getStringExtra("Plant Name");
+        theRoomName = intent.getStringExtra("Room Name");
+        theRoomId = intent.getLongExtra("Room ID", 0);
         countDataSource = new CountsDAO(this);
         countDataSource.open();
-        allCountsET = new ArrayList<EditText>();
-        allCountNamesET = new ArrayList<TextView>();
+        allCountsET = new ArrayList<>();
+        allCountNamesET = new ArrayList<>();
         pName = (TextView) findViewById(R.id.plantNameCountText);
         rName = (TextView) findViewById(R.id.roomNameCountText);
         dateText = (TextView) findViewById(R.id.countDateTextView);
         pName.setText(sentPName);
         rName.setText(theRoomName);
-        dateText.setText(getDateTime());
+        dateText.setText(intent.getStringExtra("Room Date"));
         saveBtn = (Button) findViewById(R.id.saveChangesButton);
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,17 +93,35 @@ public class CountView extends AppCompatActivity {
             }
         });
 
+        countHistory = (Button) findViewById(R.id.historyButton);
+        countHistory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(CountView.this, "Function Not Implemented Currently", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         //Create table layout for counter list & populate lsit view
         tableLayout = (TableLayout) findViewById(R.id.tableLayout);
         populateListView();
+    }
 
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        countDataSource.close();
+    }
 
+    @Override
+    protected void onResume(){
+        super.onResume();
+        populateListView();
     }
 
 
-    //Populate list with created variables in form of nested layouts.
-    //Also clears the list to prevent duplicates
+    //Populate list with created variables in form of table layout.
+    //Easiest way I found for creating a list wtih editable texts for entering data.
+    //Also clears the list to prevent duplicates when recalling
     public void populateListView(){
         //Clear table rows so there are no duplicates
         tableLayout.removeAllViews();
@@ -112,7 +131,7 @@ public class CountView extends AppCompatActivity {
         tableRow.setBackgroundColor(Color.argb(255,63,81,181));
         tableRow.setLayoutParams(new Toolbar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
         TextView column_name = new TextView(this);
-        column_name.setText("        Type        ");
+        column_name.setText("        Type        "); //If these are changed to strings from AndroidResouce, the spaces are lost and view is ruined.
         column_name.setTextSize(30);
         tableRow.addView(column_name);
         TextView column_count = new TextView(this);
@@ -127,12 +146,14 @@ public class CountView extends AppCompatActivity {
         countNumTextArray = new EditText[size];
         rowArray = new TableRow[size];
 
+        //Loop to add all counts to view
         for(int i =0; i < size; i++){
             String countName = countValues.get(i).getCountName();
             int countId = (int) countValues.get(i).getCountId();
             rowArray[i] = new TableRow(getApplicationContext());
             rowArray[i].setId(countId);
 
+            //create and set countName TextView
             countNameTextArray[i] = new TextView(getApplicationContext());
             countNameTextArray[i].setId(countId);
             countNameTextArray[i].setText(countName);
@@ -140,8 +161,10 @@ public class CountView extends AppCompatActivity {
             countNameTextArray[i].setTextColor(Color.BLACK);
             countNameTextArray[i].setGravity(Gravity.CENTER);
 
+            //Add textName view to row
             rowArray[i].addView(countNameTextArray[i]);
 
+            //create and set count number edit text view
             countNumTextArray[i] = new EditText(getApplicationContext());
             countNumTextArray[i].setId(countId);
             countNumTextArray[i].setInputType(InputType.TYPE_CLASS_NUMBER);
@@ -149,20 +172,17 @@ public class CountView extends AppCompatActivity {
             countNumTextArray[i].setTextColor(Color.BLACK);
             countNumTextArray[i].setPadding(0,0,0,20);
             countNumTextArray[i].setGravity(Gravity.CENTER_HORIZONTAL);
+            //Gets value for count from previous data entry (if there was any).
             if(countValues.get(i).getCountNumber() != 0) {
                 countNumTextArray[i].setText(String.valueOf(countValues.get(i).getCountNumber()));
-            }
+            } //Add edit text view to row
             rowArray[i].addView(countNumTextArray[i]);
             rowArray[i].setPadding(5,0,0,100);
-
+            //Add row to table layout
             tableLayout.addView(rowArray[i]);
         }
 
     }
-
-
-
-
 
     //Settings Menu Creator & Handler (3 dots top right of screen)
 
@@ -183,24 +203,15 @@ public class CountView extends AppCompatActivity {
         if(id == R.id.createCount){
             createNewCount();
         }
-        //Delete count data handler
+        //Delete counts (not just values for counts)
         if(id == R.id.deleteCounts) {
             //Add confirmation message
             countDataSource.deleteAllCounts();
             populateListView();
         }
-        if(id == R.id.roomCharts){
-            Intent openRoomChart = new Intent(CountView.this, ChartView2.class);
-            openRoomChart.putExtra("RoomId",theRoomId);
-            startActivity(openRoomChart);
-        }
+        //Remove values of counts(reset)
         if(id == R.id.resetCounts){
             countDataSource.resetCounts();
-        }
-        if(id == R.id.printList){
-            for(int i = 0; i < DatabaseHelper.selectedCells.size(); i++){
-                System.out.println(DatabaseHelper.selectedCells.get(i));
-            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -212,26 +223,28 @@ public class CountView extends AppCompatActivity {
         theRoomId = room.getRoomId();
     }
 
-
+    //Loop through all counts and update counts
     public void updateCounts(){
         for(int i = 1; i<tableLayout.getChildCount();i++){
-            TableRow tempRow = (TableRow) tableLayout.getChildAt(i);
-            EditText tempET = (EditText) tempRow.getChildAt(1);
+            TableRow tempRow = (TableRow) tableLayout.getChildAt(i);//Gets row i in tablelayout
+            EditText tempET = (EditText) tempRow.getChildAt(1); //Gets edit text in the row layout
             long countId = tempRow.getId();
             String tempString = tempET.getText().toString();
-            if(!tempString.isEmpty()) {
+            if(!tempString.equals("")) {
                 int countNum = Integer.parseInt(tempString);
-                boolean updated = countDataSource.updateCounts(theRoomId, countId, countNum);
-                if(updated){
-                    Toast updatedToast  = Toast.makeText(CountView.this, "Counts Updated Successfully.", Toast.LENGTH_LONG);
+                if (countDataSource.updateCountValue(countId, countNum)) {
+                    Toast updatedToast = Toast.makeText(CountView.this, "Counts Updated Successfully.", Toast.LENGTH_LONG);
                     updatedToast.show();
                 }
             }
+            setResult(1, intent);
+            finish();
         }
     }
 
 
     //TODO Create custom dialog xml
+    //Quick way to add a new count instead of going all the way back to the farm-counts-view
     private void createNewCount(){
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(CountView.this);
         alertBuilder.setTitle("Enter a Name For New Count: ");
@@ -240,10 +253,10 @@ public class CountView extends AppCompatActivity {
         final EditText cName = new EditText(CountView.this);
         layout.addView(cName);
         final CheckBox isChartCount = new CheckBox(CountView.this);
-        isChartCount.setText("Use this measure on charts");
+        isChartCount.setText(R.string.ChartBooleanQuestion);
         layout.addView(isChartCount);
         final CheckBox copyToAllRooms = new CheckBox(CountView.this);
-        copyToAllRooms.setText("Copy To All Rooms and Plants");
+        copyToAllRooms.setText(R.string.CopyCountAllRoomsQuestion);
         layout.addView(copyToAllRooms);
 
         alertBuilder.setView(layout);
@@ -252,21 +265,17 @@ public class CountView extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 //Check if name is empty
                 if(!cName.getText().toString().isEmpty()) {
-                    int chartCountBool;
-                    if(isChartCount.isChecked()){
-                        chartCountBool = 1;
-                    } else{chartCountBool = 0;}
-                    //Box NOT Checked
+                    //Copy All Box NOT Checked
                     if(!copyToAllRooms.isChecked()) {
-                        countDataSource.createCount(cName.getText().toString(), chartCountBool, theRoomId);
+                        countDataSource.createCount(new Count(cName.getText().toString(), isChartCount.isChecked()), theRoomId);
 
                         System.out.println("Adding Count to This Room");
                         //Refresh view
                         populateListView();
                     }
-                    //Box IS Checked
+                    //Copy All Box IS Checked
                     else if(copyToAllRooms.isChecked()){
-                            countDataSource.createCountAllRooms(cName.getText().toString(), chartCountBool);
+                            countDataSource.createCountAllRooms(new Count(cName.getText().toString(), isChartCount.isChecked()));
                         System.out.println("Adding Count to All Rooms and Plants");
                         //Refresh view
                         populateListView();

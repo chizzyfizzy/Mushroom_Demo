@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:paddingBottom="20dp"
         android:paddingTop="20dp"
-        android:text="TextView"
+        android:text="name"
         android:textAlignment="center"
         android:textSize="20dp" />
 </LinearLayout>

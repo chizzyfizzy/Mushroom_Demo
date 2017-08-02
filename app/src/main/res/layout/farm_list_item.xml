@@ -10,14 +10,15 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:paddingLeft="15dp"
-        android:text="TextView"
+        android:text="name"
         android:textColor="@android:color/background_dark"
-        android:textSize="24sp" />
+        android:textSize="36sp" />
 
     <TextView
         android:id="@+id/farmDescListItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="TextView" />
+        android:text="label"
+        android:textSize="18sp" />
 </LinearLayout>

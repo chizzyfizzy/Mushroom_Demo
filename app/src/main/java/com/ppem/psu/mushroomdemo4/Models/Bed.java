@@ -10,6 +10,19 @@ public class Bed {
     private int bedLevels;
     private int bedSquares;
 
+    public Bed(){
+        this.id = getBedId();
+        this.bedName = getBedName();
+        this.bedLevels = getBedLevels();
+        this.bedSquares = getBedSquares();
+    }
+
+    public Bed(String name, int levels, int squares){
+        this.bedName = name;
+        this.bedLevels = levels;
+        this.bedSquares = squares;
+    }
+
 
     public long getBedId() {
         return id;

@@ -13,16 +13,18 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.ppem.psu.mushroomdemo4.Controllers.CountsDAO;
-import com.ppem.psu.mushroomdemo4.Controllers.FarmDAO;
-import com.ppem.psu.mushroomdemo4.Controllers.RoomDAO;
+import com.ppem.psu.mushroomdemo4.DatabaseControllers.CountsDAO;
+import com.ppem.psu.mushroomdemo4.DatabaseControllers.FarmDAO;
+import com.ppem.psu.mushroomdemo4.DatabaseControllers.RoomDAO;
 import com.ppem.psu.mushroomdemo4.Models.Count;
+import com.ppem.psu.mushroomdemo4.Models.Room;
 import com.ppem.psu.mushroomdemo4.R;
 
 import java.util.List;
 
 public class FarmCountsView extends AppCompatActivity {
     RoomDAO roomDataSource;
+    List<Room> roomList;
     CountsDAO countDataSource;
     PlantListViewAdapter pAdapter;
     FarmDAO farmDataSource;
@@ -43,17 +45,16 @@ public class FarmCountsView extends AppCompatActivity {
         setContentView(R.layout.activity_farm_counts_view);
         Intent intent = getIntent();
         farmId = intent.getLongExtra("farm", 0);
+        roomDataSource = new RoomDAO(this);
+        roomDataSource.open();
+        roomList = roomDataSource.getAllRooms();
         countDataSource = new CountsDAO(this);
         countDataSource.open();
+
         countList = countDataSource.getDistinctCounts();
         if(countList.size() == 0){
-            countDataSource.createDefaultCount("Fly 1", 0);
-            countDataSource.createDefaultCount("Fly 2", 0);
-            countDataSource.createDefaultCount("Green Mold", 1);
-            countDataSource.createDefaultCount("Cobweb", 1);
-            countDataSource.createDefaultCount("Syzygites", 1);
-            countDataSource.createDefaultCount("Blotch", 1);
-        }
+            createDefaultCounts();
+        }//TODO fix booleans
         countList = countDataSource.getDistinctCounts();
         adapter = new FarmCountsListAdapter(this, countList);
         countLV = (ListView) findViewById(R.id.farmCountsListView);
@@ -72,6 +73,7 @@ public class FarmCountsView extends AppCompatActivity {
                 index = position;
                 count = countList.get(position);
                 countName.setText(count.getCountName());
+                inChart.setChecked(count.isInChart());
             }
         });
 
@@ -79,19 +81,16 @@ public class FarmCountsView extends AppCompatActivity {
         addC.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(countName.getText().toString() == "") {
+                if(countName.getText().toString().equals("")) {
                     Toast.makeText(FarmCountsView.this, "No name has been entered.", Toast.LENGTH_SHORT).show();
                 }
                 else{
-                    int chartBool = 0;
-                    if(inChart.isChecked()){
-                        chartBool = 1;
-                        inChart.toggle();
-                    }
                     countList.add(new Count(countName.getText().toString(), inChart.isChecked()));
                     adapter.notifyDataSetChanged();
-                    countDataSource.createCountAllRooms(countName.getText().toString(), chartBool);
-                    countName.setText("");
+                    for(int i = 0; i < roomList.size(); i++){
+                        countDataSource.createCount(new Count(countName.getText().toString(), inChart.isChecked()), roomList.get(i).getRoomId());
+                    }
+                    clearSelection();
                 }
             }
         });
@@ -99,24 +98,23 @@ public class FarmCountsView extends AppCompatActivity {
         updateC.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int chartBool = 0;
-                if(inChart.isChecked()){
-                    chartBool = 1;
-                }
                 if(count == null){
                     Toast.makeText(FarmCountsView.this, "No Count selected.", Toast.LENGTH_SHORT).show();
                 }
-                else if(countName.getText().toString() == ""){
+                else if(countName.getText().toString().equals("") || countName.getText().toString().equals(" ")){
                     Toast.makeText(FarmCountsView.this, "No name has been entered.", Toast.LENGTH_SHORT).show();
                 }
-                else if((count.getCountName() == countName.getText().toString()) && (count.isInChart() == inChart.isChecked())){
+                else if((count.getCountName().equals(countName.getText().toString())) && (count.isInChart() == inChart.isChecked())){
                     Toast.makeText(FarmCountsView.this, "Selected count hasn't changed.", Toast.LENGTH_SHORT).show();
                 }
                 else{
+                    countDataSource.updateCountWithName(count.getCountName(), countName.getText().toString(), inChart.isChecked());
                     countList.set(index, new Count(countName.getText().toString(), inChart.isChecked()));
                     adapter.notifyDataSetChanged();
-                    countDataSource.updateCount(countName.getText().toString(), chartBool, count.getCountId());
+                    Toast.makeText(FarmCountsView.this, "Count Updated ", Toast.LENGTH_SHORT).show();
+                    clearSelection();
                 }
+
             }
         });
 
@@ -133,14 +131,35 @@ public class FarmCountsView extends AppCompatActivity {
                             .setIcon(android.R.drawable.ic_dialog_alert)
                             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
-                                    countDataSource.deleteCount(count);
+                                    countList.remove(index);
+                                    adapter.notifyDataSetChanged();
+                                    countDataSource.deleteCountWithName(count);
                                     Toast.makeText(FarmCountsView.this, "Deleted Count " + count.getCountName(), Toast.LENGTH_SHORT).show();
+                                    clearSelection();
                                 }})
                             .setNegativeButton("Cancel", null).show();
+
                 }
+
             }
         });
 
+    }
+
+    private void clearSelection(){
+        index = 0;
+        count = null;
+        countName.setText("");
+        inChart.setChecked(false);
+    }
+
+    private void createDefaultCounts(){
+        countDataSource.createDefaultCount("Fly 1", false);
+        countDataSource.createDefaultCount("Fly 2", false);
+        countDataSource.createDefaultCount("Green Mold", true);
+        countDataSource.createDefaultCount("Cobweb", true);
+        countDataSource.createDefaultCount("Syzygites", true);
+        countDataSource.createDefaultCount("Blotch", true);
     }
 
 

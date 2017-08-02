@@ -9,6 +9,17 @@ public class Farm {
     private String farmName;
     private String farmDescription;
 
+    public Farm(){
+        this.farmId = getFarmId();
+        this.farmName = getFarmName();
+        this.farmDescription = getFarmDescription();
+    }
+
+    public Farm(String name, String description){
+        this.farmName = name;
+        this.farmDescription = description;
+    }
+
     public long getFarmId() {
         return farmId;
     }

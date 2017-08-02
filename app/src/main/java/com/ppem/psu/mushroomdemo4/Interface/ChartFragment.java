@@ -1,7 +1,6 @@
 package com.ppem.psu.mushroomdemo4.Interface;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.Gravity;
@@ -11,12 +10,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ppem.psu.mushroomdemo4.Controllers.CellDAO;
-import com.ppem.psu.mushroomdemo4.Controllers.CountCellEntityDAO;
-import com.ppem.psu.mushroomdemo4.Models.Bed;
+import com.ppem.psu.mushroomdemo4.DatabaseControllers.CellDAO;
+import com.ppem.psu.mushroomdemo4.DatabaseControllers.CountCellEntityDAO;
+import com.ppem.psu.mushroomdemo4.DatabaseControllers.CountsDAO;
 import com.ppem.psu.mushroomdemo4.Models.Cell;
 import com.ppem.psu.mushroomdemo4.Models.Count;
 import com.ppem.psu.mushroomdemo4.Models.CountCellEntity;
@@ -28,26 +26,21 @@ import java.util.List;
 
 public class ChartFragment extends Fragment {
     private long bedId;
-    public Bed bed;
-
-
     private List<Cell> cellList;
-    private List<Count> countList, countsForCell;
-    private List<CountCellEntity> countCellEntityList;
+    private List<Count> spinnerCountList, countsForCell;
     private Context context;
     private CellDAO cellDataSource;
+    private CountsDAO countDataSource;
     private CountCellEntityDAO countCellDataSource;
     private Long roomId;
     private ChartAdapter chartAdapter;
-    private GridView gridView;
-    private Spinner countSpinner;
     private int chartCol;
     Count currentCount;
     ChartView2 activity;
     String bedName;
 
     public ChartFragment(){
-
+        //Required fragment constructor
     }
 
     @Override
@@ -65,7 +58,10 @@ public class ChartFragment extends Fragment {
                              Bundle savedInstanceState) {
         activity = (ChartView2)getActivity();
         context = getActivity();
-        countList = activity.countList;
+
+        countDataSource = new CountsDAO(context);
+        countDataSource.open();
+        spinnerCountList = countDataSource.getChartCounts(roomId);
 
         cellDataSource = new CellDAO(context);
         cellDataSource.open();
@@ -74,70 +70,82 @@ public class ChartFragment extends Fragment {
 
         countCellDataSource = new CountCellEntityDAO(context);
         countCellDataSource.open();
-        countCellEntityList = new ArrayList<>();
-        countCellEntityList = countCellDataSource.getAllCountCellsBed(bedId);
         countsForCell = new ArrayList<>();
-        for(int i = 0; i < cellList.size(); i++){
+        for(int i = 0; i < cellList.size(); i++){ //Loop that gets counts that were added to the cell. Sets a list of counts for the cell that are added to the view in the adapter.
             countsForCell = countCellDataSource.getDistinctCountsForCell(cellList.get(i).getCellId());
             cellList.get(i).setCountListInCell(countsForCell);
         }
 
-
-        Toast.makeText(context, "Bed " + String.valueOf(bedId),Toast.LENGTH_SHORT).show();
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.chart_fragment, container, false);
         chartAdapter = new ChartAdapter(context, cellList);
-        gridView = (GridView) rootView.findViewById(R.id.chartGridView);
-        gridView.setNumColumns(chartCol);
-        gridView.setAdapter(chartAdapter);
-        gridView.setGravity(Gravity.TOP);
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        GridView chartGV = (GridView) rootView.findViewById(R.id.chartGridView);
+        chartGV.setNumColumns(chartCol);
+        chartGV.setAdapter(chartAdapter);
+        chartGV.setGravity(Gravity.TOP);
+        chartGV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Cell selectedCell = cellList.get(position);
-                view.setBackgroundColor(Color.GREEN);
-                TextView tempTV = (TextView) view.findViewById(R.id.countsAddedLabel);
-                String currentCountsString = tempTV.getText().toString();
-                if(currentCountsString.equals("")) {
-                    tempTV.setText(String.valueOf(currentCount.getCountName().charAt(0)));
-                    currentCountsString = String.valueOf(currentCount.getCountName().charAt(0));
-                } else{
-                    currentCountsString = currentCountsString + "-" + String.valueOf(currentCount.getCountName().charAt(0));
-                    tempTV.setText(currentCountsString);
+                //If cell already has counts. Search and find any matching counts to delete it. Otherwise add count.
+                if(selectedCell.getCountListInCell().size() > 0){
+                    if(!deleteCountFromCell(selectedCell)){
+                        addCountToCell(selectedCell);
+                    }
                 }
-                chartAdapter.countsForCellString[position] = currentCountsString;
-                countCellDataSource.insertCountCellEntity(new CountCellEntity(selectedCell, currentCount), bedId);
-                selectedCell.addCountListInCell(currentCount);
-                String tempCellLabel = bedId + "-" + selectedCell.getCellColumn() + "-(" + selectedCell.getCellRow() + ")";
-                Toast.makeText(context, "Added " + currentCount.getCountName() +" to square " + tempCellLabel, Toast.LENGTH_SHORT).show();
+                else{addCountToCell(selectedCell);}
             }
         });
 
-        CountSpinnerAdapter spinnerAdapter = new CountSpinnerAdapter(context, R.layout.count_spinner_item, countList);
+        CountSpinnerAdapter spinnerAdapter = new CountSpinnerAdapter(context, R.layout.count_spinner_item, spinnerCountList);
         spinnerAdapter.setDropDownViewResource(R.layout.count_spinner_item);
-        countSpinner = (Spinner) rootView.findViewById(R.id.countSpinner);
+        Spinner countSpinner = (Spinner) rootView.findViewById(R.id.countSpinner);
         countSpinner.setAdapter(spinnerAdapter);
-        if(countList.size() > 0) {
-            currentCount = countList.get(0);
+        if(spinnerCountList.size() > 0) {
+            currentCount = spinnerCountList.get(0);
         }
         countSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    currentCount = countList.get(position);
+                    currentCount = spinnerCountList.get(position);
                 }
-
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {
-
                 }
             });
         return rootView;
     }
 
-    public void updateChart(){
-        bedId = activity.bed.getBedId();
-        cellList = cellDataSource.getCellsForBed(bedId);
+
+    private void addCountToCell(Cell selectedCell){
+        countCellDataSource.insertCountCellEntity(new CountCellEntity(selectedCell, currentCount), bedId);
+        currentCount.setCountNumber(currentCount.getCountNumber() + 1);
+        countDataSource.updateCountValue(currentCount.getCountId(), currentCount.getCountNumber());
+        selectedCell.addCountListInCell(currentCount);
         chartAdapter.notifyDataSetChanged();
+        Toast.makeText(context, "Added " + currentCount.getCountName() + " to square "
+                + bedName
+                + "-" + selectedCell.getCellColumn()
+                + "(" + selectedCell.getCellRow() + ")", Toast.LENGTH_SHORT).show();
     }
+
+    private boolean deleteCountFromCell(Cell selectedCell){
+        for(int i = 0; i < selectedCell.getCountListInCell().size(); i++){
+            if(currentCount.getCountId() == selectedCell.getCountListInCell().get(i).getCountId()){
+                countCellDataSource.deleteCountCell(selectedCell.getCountListInCell().get(i).getCountId(), selectedCell.getCellId(),bedId);
+                currentCount.setCountNumber(currentCount.getCountNumber() -1 );
+                countDataSource.updateCountValue(currentCount.getCountId(), currentCount.getCountNumber());
+                selectedCell.getCountListInCell().remove(i);
+                chartAdapter.notifyDataSetChanged();
+                Toast.makeText(context, "Deleted " + currentCount.getCountName() + " from square "
+                        + bedName
+                        + "-" + selectedCell.getCellColumn()
+                        + "(" + selectedCell.getCellRow() + ")", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        }
+        return false;
+    }
+
 
 }

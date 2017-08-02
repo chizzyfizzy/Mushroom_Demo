@@ -46,17 +46,7 @@ public class ChartAdapter extends ArrayAdapter<Cell> {
         Cell cell = cellList.get(position);
         ChartViewHolder viewHolder;
         items = cellList.size();
-        String addCountToCellString = "";
-        // countsForCellString = new String[cellList.size()];
 
-        for(int i = 0;  i < cell.getCountListInCell().size();i++){
-            addCountToCellString += cell.getCountListInCell().get(i).getCountName().charAt(0);
-        }
-
-
-        if(countsForCellString[position] == null) {
-            countsForCellString[position] = (addCountToCellString);
-        }
 
         if(view == null) {
             final LayoutInflater layoutInflater = LayoutInflater.from(getContext());
@@ -87,37 +77,31 @@ public class ChartAdapter extends ArrayAdapter<Cell> {
         }
         else{viewHolder = (ChartViewHolder) view.getTag();}
 
-
         viewHolder.cellColumn.setText(String.valueOf(cell.getCellColumn()) + "-");
         viewHolder.cellRow.setText("(" + String.valueOf(cell.getCellRow()) + ")");
 
         //This adds counts to cells that have been selected (should get selected ones from last edit DATE)
-        String tempString = "";
         if(cell.getCountListInCell().size() > 0) {
-            for (int i = 0; i < cell.getCountListInCell().size(); i++) {
+            String tempString = "";
+            for (int i = 0; i < cell.getCountListInCell().size(); i++) { //Gets first letter of each count added
                 Count count = cell.getCountListInCell().get(i);
-                tempString = tempString + String.valueOf(count.getCountName().charAt(0));
+                tempString += String.valueOf(count.getCountName().charAt(0));
                 countsForCellString[position] = tempString;
-
             }
-            //viewHolder.countsAdded.setText(tempString);
-            view.setBackgroundColor(Color.GREEN);
             booleanArray.put(position, true);
         }
-
-        if(countsForCellString[position] != null) {
-            viewHolder.countsAdded.setText(countsForCellString[position]);
-        } else{
-            viewHolder.countsAdded.setText("");
+        else{
+            countsForCellString[position] = "";
+            booleanArray.put(position, false);
         }
+        //Set the text counts text at postion
+        viewHolder.countsAdded.setText(countsForCellString[position]);
 
+        //boolean array required to set background color of cells that have counts or not.
         if(booleanArray.get(position)){
             view.setBackgroundColor(Color.GREEN);
         }
         else{view.setBackgroundColor(Color.TRANSPARENT);}
-
-
-
 
         return view;
     }

@@ -3,11 +3,6 @@
 
 
     <item
-        android:id = "@+id/roomCharts"
-        android:title = "View Room Chart"
-        />
-
-    <item
         android:id="@+id/resetCounts"
         android:title="Reset Counts"
         />
@@ -21,9 +16,5 @@
         android:title = "Delete Counts"
         />
 
-    <item
-        android:id="@+id/printList"
-        android:title="Print Cell List"
-        />
 
 </menu>

@@ -1,4 +1,4 @@
-package com.ppem.psu.mushroomdemo4.Controllers;
+package com.ppem.psu.mushroomdemo4.DatabaseControllers;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,7 +17,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "farm.db";
 
     //Increment for every change in database structure.
-    public static final int DATABASE_VERSION = 36;
+    public static final int DATABASE_VERSION = 40;
 
     //Farm Table
     public static final String TABLE_NAME_FARMS = "Farms";
@@ -60,7 +60,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             " ( " + ROOM_ID + " INTEGER PRIMARY KEY AUTOINCREMENT , "
             + ROOM_NAME + " TEXT NOT NULL, "
             + ROOM_LABEL + " TEXT, "
-            + ROOM_LAST_EDIT + " INTEGER, "
+            + ROOM_LAST_EDIT + " TEXT, "
             + FK_PLANT_ID + " INTEGER NOT NULL, "
             + " FOREIGN KEY (" + FK_PLANT_ID + ") REFERENCES " + TABLE_NAME_PLANTS + " (" + PLANT_ID + ")"
             + ");";
@@ -72,7 +72,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COUNT_ID = "co_id";
     public static final String COUNT_NAME = "countName";
     public static final String COUNT_NUMBER = "countNum";
-    public static final String COUNT_CREATED_AT = "countDate";
+    public static final String COUNT_DATE = "countDate";
     public static final String COUNT_CHART_BOOLEAN = "countChart";
     public static final String FK_COUNT_ROOM = "roomId";
     //Create Counts Table Statement
@@ -80,30 +80,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + COUNT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT , "
             + COUNT_NAME + " TEXT NOT NULL, "
             + COUNT_NUMBER + " INTEGER , "
-            + COUNT_CREATED_AT + " INTEGER , "
+            + COUNT_DATE + " INTEGER , "
             + COUNT_CHART_BOOLEAN + " INTEGER ,"
             + FK_COUNT_ROOM + " INTEGER , "
             + " FOREIGN KEY (" + FK_COUNT_ROOM + ") REFERENCES " + TABLE_NAME_ROOMS + " (" + ROOM_ID+")"
             + ");";
 
-
-
-    //Charts Table
-    public static final String TABLE_NAME_CHARTS = "Charts";
-    public static final String CHART_ID = "ch_id";
-    public static final String CHART_COL_NUM = "colNum";
-    public static final String CHART_ROW_NUM = "rowNum";
-    public static final String CHART_BED_PEAK= "bedPeak";
-    public static final String FK_CHART_ROOM = "roomID";
-    //Create Charts Table Statement
-    private static final String CREATE_TABLE_CHARTS = "CREATE TABLE " + TABLE_NAME_CHARTS + " ( "
-            + CHART_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + CHART_COL_NUM + " INTEGER NOT NULL, "
-            + CHART_ROW_NUM + " INTEGER NOT NULL, "
-            + CHART_BED_PEAK + " INTEGER , "
-            + FK_CHART_ROOM + " INTEGER NOT NULL, "
-            + " FOREIGN KEY (" + FK_CHART_ROOM + ") REFERENCES " + TABLE_NAME_ROOMS + " (" + ROOM_ID + ")"
-            + ");";
 
     //Bed Table
     public static final String TABLE_NAME_BEDS = "Beds";
@@ -118,11 +100,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + BED_NAME + " TEXT NOT NULL, "
             + BED_LEVELS + " INTEGER NOT NULL, "
             + BED_SQUARES + " INTEGER NOT NULL, "
-            + FK_CHART_ROOM + " INTEGER NOT NULL, "
-            + " FOREIGN KEY (" + FK_CHART_ROOM + ") REFERENCES " + TABLE_NAME_ROOMS + " (" + ROOM_ID + ")"
+            + FK_BED_ROOM + " INTEGER NOT NULL, "
+            + " FOREIGN KEY (" + FK_BED_ROOM + ") REFERENCES " + TABLE_NAME_ROOMS + " (" + ROOM_ID + ")"
             + ");";
-
-
 
     //Cell or Squares Table
     public static final String TABLE_NAME_CELLS = "Cells";
@@ -169,7 +149,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         database.execSQL(CREATE_TABLE_FARMS);
         database.execSQL(CREATE_TABLE_PLANTS);
         database.execSQL(CREATE_TABLE_ROOMS);
-        database.execSQL(CREATE_TABLE_CHARTS);
         database.execSQL(CREATE_TABLE_BEDS);
         database.execSQL(CREATE_TABLE_COUNTS);
         database.execSQL(CREATE_TABLE_CELLS);
@@ -183,7 +162,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_FARMS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_PLANTS );
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_ROOMS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_CHARTS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_BEDS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_COUNTS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_CELLS);

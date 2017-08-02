@@ -2,23 +2,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.ppem.psu.mushroomdemo4.ChartView">
+
     <item
-        android:id = "@+id/createChart"
-        android:title = "Create New Chart"
-        />
-    <item
-        android:id = "@+id/editChart"
+        android:id = "@+id/editBeds"
         android:title = "Edit Chart"
-        />
-
-    <item
-        android:id="@+id/deleteAllCharts"
-        android:title = "Delete All Charts"
-        />
-
-    <item
-        android:id="@+id/deleteCells"
-        android:title="Delete Cells"
         />
 
 

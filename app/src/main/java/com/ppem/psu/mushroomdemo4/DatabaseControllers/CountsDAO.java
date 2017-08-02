@@ -1,10 +1,11 @@
-package com.ppem.psu.mushroomdemo4.Controllers;
+package com.ppem.psu.mushroomdemo4.DatabaseControllers;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.provider.ContactsContract;
 
 import com.ppem.psu.mushroomdemo4.Models.Count;
 import com.ppem.psu.mushroomdemo4.Models.Room;
@@ -36,10 +37,11 @@ public class CountsDAO {
         dbHelper.close();
     }
 
-    public Count createCount(String newCountName, int isChartCount, Long roomId){
+    public Count createCount(Count count, Long roomId){
+        int chartBool = (count.isInChart()) ? 1:0;
         ContentValues values = new ContentValues();
-        values.put(DatabaseHelper.COUNT_NAME, newCountName);
-        values.put(DatabaseHelper.COUNT_CHART_BOOLEAN, isChartCount);
+        values.put(DatabaseHelper.COUNT_NAME, count.getCountName());
+        values.put(DatabaseHelper.COUNT_CHART_BOOLEAN, chartBool);
        // values.put(DatabaseHelper.COUNT_CREATED_AT, System.currentTimeMillis());
         values.put(DatabaseHelper.FK_COUNT_ROOM, roomId);
         long insertId = database.insert(DatabaseHelper.TABLE_NAME_COUNTS, null, values);
@@ -50,7 +52,8 @@ public class CountsDAO {
         return newCount;
     }
 
-    public boolean createCountAllRooms(String newCountName, int isInChart){
+    public boolean createCountAllRooms(Count count){
+        int chartBool = (count.isInChart()) ? 1:0;
         boolean success;
         try {
             //Get room list to iterate through and get the id of each.
@@ -65,8 +68,8 @@ public class CountsDAO {
             }
             //Iterate through each room in roomList and add new count with passed name. Also gives corresponding FK_ROOM_ID for each count
             ContentValues values = new ContentValues();
-            values.put(DatabaseHelper.COUNT_NAME, newCountName);
-            values.put(DatabaseHelper.COUNT_CHART_BOOLEAN, isInChart);
+            values.put(DatabaseHelper.COUNT_NAME, count.getCountName());
+            values.put(DatabaseHelper.COUNT_CHART_BOOLEAN, chartBool);
            // values.put(DatabaseHelper.COUNT_CREATED_AT, System.currentTimeMillis());
             for (int i = 0; i < roomList.size(); i++) {
                 long roomId = roomList.get(i).getRoomId();
@@ -142,26 +145,37 @@ public class CountsDAO {
         System.out.println("All Counts Delete");
         database.delete(DatabaseHelper.TABLE_NAME_COUNTS, null, null);
     }
-    //TODO Change to insert and add a weekly count
-    public boolean updateCounts(long roomId, long countId, int countNum){
-        System.out.println("Updating Counts for Room " + roomId);
+
+    public boolean updateCountValue(long countId, int countNum){
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.COUNT_NUMBER, countNum);
-        database.update(DatabaseHelper.TABLE_NAME_COUNTS, values, DatabaseHelper.COUNT_ID + " = " + countId +
-                                                                " AND " + DatabaseHelper.FK_COUNT_ROOM + " = " + roomId, null);
+        database.update(DatabaseHelper.TABLE_NAME_COUNTS, values, DatabaseHelper.COUNT_ID + " = " + countId, null);
         return true;
     }
+
 
     public void resetCounts(){
         System.out.println("Resetting Count Data");
         database.delete(DatabaseHelper.TABLE_NAME_COUNTS, DatabaseHelper.COUNT_NUMBER,null);
     }
 
-    public void updateCount(String cName, int inChart, long cId){
+    public void updateCountSetting(String cName, boolean inChart, long cId){
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.COUNT_NAME, cName);
-        values.put(DatabaseHelper.COUNT_CHART_BOOLEAN, inChart);
+        values.put(DatabaseHelper.COUNT_CHART_BOOLEAN, (inChart) ? 1:0);
         database.update(DatabaseHelper.TABLE_NAME_COUNTS, values, DatabaseHelper.COUNT_ID + " = " + cId, null);
+    }
+
+    public void updateCountWithName(String oldName, String newName, boolean inChart){
+        int chartBool = (inChart) ? 1:0;
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.COUNT_NAME, newName);
+        values.put(DatabaseHelper.COUNT_CHART_BOOLEAN, (inChart) ? 1:0);
+        database.update(DatabaseHelper.TABLE_NAME_COUNTS, values, DatabaseHelper.COUNT_NAME + " = '" + oldName + "'", null);
+    }
+
+    public void deleteCountWithName(Count count) {
+        database.delete(DatabaseHelper.TABLE_NAME_COUNTS, DatabaseHelper.COUNT_NAME + " = '" + count.getCountName() + "'", null);
     }
 
     public List<Count> getDistinctCounts(){
@@ -177,10 +191,11 @@ public class CountsDAO {
         return countList;
     }
 
-    public void createDefaultCount(String name, int useInChart){
+    public void createDefaultCount(String name, boolean inChart){
+        int chartBool = (inChart) ? 1:0;
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.COUNT_NAME, name);
-        values.put(DatabaseHelper.COUNT_CHART_BOOLEAN, useInChart);
+        values.put(DatabaseHelper.COUNT_CHART_BOOLEAN, chartBool);
         database.insert(DatabaseHelper.TABLE_NAME_COUNTS, null, values);
     }
 
@@ -191,7 +206,7 @@ public class CountsDAO {
         count.setCountId(cursor.getLong(0));
         count.setCountName(cursor.getString(1));
         count.setCountNumber(cursor.getInt(2));
-        count.setInChart(cursor.getInt(3));
+        count.setInChart(cursor.getInt(3) == 1);
 //        count.setCountDate(cursor.getInt(3));
         return count;
     }
@@ -202,5 +217,7 @@ public class CountsDAO {
         room.setRoomName(cursor.getString(1));
         return room;
     }
+
+
 
 }

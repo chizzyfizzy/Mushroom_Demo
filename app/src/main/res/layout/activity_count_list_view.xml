@@ -70,7 +70,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
-            android:text="Open Chart"></Button>
+            android:text="Open Chart"
+            android:layout_weight="0.46"></Button>
+
+        <Button
+            android:id="@+id/historyButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.55"
+            android:text="History" />
 
 
     </LinearLayout>

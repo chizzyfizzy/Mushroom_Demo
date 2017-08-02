@@ -32,9 +32,11 @@ public class RoomListViewAdapter extends ArrayAdapter<Room> {
 
         TextView rName = (TextView) convertView.findViewById(R.id.roomNameTextView);
         TextView rLabel = (TextView) convertView.findViewById(R.id.roomLabelText);
+        TextView rDate = (TextView) convertView.findViewById(R.id.roomLastEditTextView);
 
         rName.setText(room.getRoomName());
         rLabel.setText(room.getRoomLabel());
+        rDate.setText(room.getLastEdit());
 
         return convertView;
     }

@@ -1,4 +1,4 @@
-package com.ppem.psu.mushroomdemo4.Controllers;
+package com.ppem.psu.mushroomdemo4.DatabaseControllers;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -20,7 +20,7 @@ public class RoomDAO {
     //DB Fields
     private SQLiteDatabase database;
     private DatabaseHelper dbHelper;
-    private String[] allColumns = {DatabaseHelper.ROOM_ID, DatabaseHelper.ROOM_NAME, DatabaseHelper.ROOM_LABEL};
+    private String[] allColumns = {DatabaseHelper.ROOM_ID, DatabaseHelper.ROOM_NAME, DatabaseHelper.ROOM_LABEL, DatabaseHelper.ROOM_LAST_EDIT};
 
     public RoomDAO (Context context) {
         dbHelper = new DatabaseHelper(context);
@@ -55,9 +55,7 @@ public class RoomDAO {
 
     public List<Room> getAllRoomsForPlant(long plantId) {
         List<Room> roomList = new ArrayList<Room>();
-
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_ROOMS, allColumns, DatabaseHelper.FK_PLANT_ID + " = " + plantId, null, null, null, null);
-
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             Room room = cursorToRoom(cursor);
@@ -70,9 +68,7 @@ public class RoomDAO {
 
     public List<Room> getAllRooms(){
         List<Room> roomList = new ArrayList<Room>();
-
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_ROOMS, allColumns, null, null, null, null, null);
-
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             Room room = cursorToRoom(cursor);
@@ -91,6 +87,12 @@ public class RoomDAO {
                                                                 + DatabaseHelper.FK_PLANT_ID + " = " + pId, null);
     }
 
+    public void updateRoomDate(long rId, String date){
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.ROOM_LAST_EDIT, date);
+        database.update(DatabaseHelper.TABLE_NAME_ROOMS, values, DatabaseHelper.ROOM_ID + " = " + rId, null);
+    }
+
 
     public void deleteAllRoomsForPlant(long plantId){
         System.out.println("All Rooms Deleted For Plant " + plantId);
@@ -101,6 +103,8 @@ public class RoomDAO {
         Room room = new Room();
         room.setRoomId(cursor.getLong(0));
         room.setRoomName(cursor.getString(1));
+        room.setRoomLabel(cursor.getString(2));
+        room.setLastEdit(cursor.getString(3));
         return room;
     }
 

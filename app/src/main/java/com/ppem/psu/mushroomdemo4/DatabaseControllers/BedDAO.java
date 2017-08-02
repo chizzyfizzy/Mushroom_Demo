@@ -1,4 +1,4 @@
-package com.ppem.psu.mushroomdemo4.Controllers;
+package com.ppem.psu.mushroomdemo4.DatabaseControllers;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -34,11 +34,11 @@ public class BedDAO {
         dbHelper.close();
     }
 
-    public Bed createBed(String bedName, int bedNum, int squareNum, long roomId){
+    public Bed createBed(Bed bed, long roomId){
         ContentValues values = new ContentValues();
-        values.put(DatabaseHelper.BED_NAME, bedName);
-        values.put(DatabaseHelper.BED_LEVELS, bedNum);
-        values.put(DatabaseHelper.BED_SQUARES, squareNum);
+        values.put(DatabaseHelper.BED_NAME, bed.getBedName());
+        values.put(DatabaseHelper.BED_LEVELS, bed.getBedLevels());
+        values.put(DatabaseHelper.BED_SQUARES, bed.getBedSquares());
         values.put(DatabaseHelper.FK_BED_ROOM, roomId);
         long insertId = database.insert(DatabaseHelper.TABLE_NAME_BEDS, null, values);
         Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_BEDS, allColumns, DatabaseHelper.BED_ID + " = " + insertId, null, null, null, null);
@@ -65,8 +65,8 @@ public class BedDAO {
 
             //Iterate through each room in roomList and add new chart with passed name. Also gives corresponding FK_ROOM_ID for each count
             ContentValues values = new ContentValues();
-            values.put(DatabaseHelper.CHART_COL_NUM, bedNum);
-            values.put(DatabaseHelper.CHART_ROW_NUM, bedSquaresNum);
+            values.put(DatabaseHelper.BED_LEVELS, bedNum);
+            values.put(DatabaseHelper.BED_SQUARES, bedSquaresNum);
             for (int i = 0; i < roomList.size(); i++) {
                 long roomId = roomList.get(i).getRoomId();
                 values.put(DatabaseHelper.FK_BED_ROOM, roomId);

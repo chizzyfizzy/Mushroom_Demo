@@ -9,12 +9,15 @@ import java.util.Date;
 public class Count {
     private long countId;
     private String countName;
-    private long countNumber;
+    private int countNumber;
     private boolean inChart;
-    private long countDate;
+    private Date countDate;
 
     public Count(){
-
+        this.countId = getCountId();
+        this.countName = getCountName();
+        this.countNumber = getCountNumber();
+        this.inChart = isInChart();
     }
 
     public Count(String countName){
@@ -42,19 +45,19 @@ public class Count {
         this.countName = countName;
     }
 
-    public long getCountNumber() {
+    public int getCountNumber() {
         return countNumber;
     }
 
-    public void setCountNumber(long countNumber) {
+    public void setCountNumber(int countNumber) {
         this.countNumber = countNumber;
     }
 
-    public long getCountDate() {
+    public Date getCountDate() {
         return countDate;
     }
 
-    public void setCountDate(long countDate) {
+    public void setCountDate(Date countDate) {
         this.countDate = countDate;
     }
 
@@ -62,13 +65,8 @@ public class Count {
         return inChart;
     }
 
-    public void setInChart(int inChart) {
-        if(inChart == 0) {
-            this.inChart = false;
-        }
-        if(inChart == 1){
-            this.inChart = true;
-        }
+    public void setInChart(boolean inChart) {
+        this.inChart = inChart;
     }
 
     @Override

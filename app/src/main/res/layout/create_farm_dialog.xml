@@ -14,17 +14,25 @@
         android:textColor="@android:color/black" />
 
     <TextView
+        android:id="@+id/textView13"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView5"
+        android:layout_centerHorizontal="true"
+        android:text="You Can Edit These Details Later" />
+
+    <TextView
         android:id="@+id/textView7"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/textView13"
-        android:layout_marginLeft="13dp"
-        android:layout_marginStart="13dp"
-        android:layout_marginTop="35dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="11dp"
         android:text="Farm Name:"
-        android:textColor="@android:color/black" />
+        android:textColor="@android:color/black"
+        android:layout_below="@+id/textView13"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:id="@+id/textView8"
@@ -66,14 +74,6 @@
         android:layout_alignBottom="@+id/roomNameEditText"
         android:layout_alignLeft="@+id/textView10"
         android:layout_alignStart="@+id/textView10" />
-
-    <TextView
-        android:id="@+id/textView13"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textView5"
-        android:layout_centerHorizontal="true"
-        android:text="You Can Edit These Details Later" />
 
     <EditText
         android:id="@+id/farmNameEditText"

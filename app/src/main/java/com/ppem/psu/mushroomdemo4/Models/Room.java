@@ -1,8 +1,5 @@
 package com.ppem.psu.mushroomdemo4.Models;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 /**
  * Created by Mitchell on 6/19/2017.
  */
@@ -12,6 +9,24 @@ public class Room {
     private long roomId;
     private String roomName;
     private String roomLabel;
+    private String lastEdit;
+
+    public Room(){
+        this.roomId = getRoomId();
+        this.roomName = getRoomName();
+        this.lastEdit = getLastEdit();
+    }
+
+    public Room(String name, String label){
+        this.roomName = name;
+        this.roomLabel = label;
+    }
+
+    public Room(Long rId, String name, String label){
+        this.roomId = rId;
+        this.roomName = name;
+        this.roomLabel = label;
+    }
 
 
     public long getRoomId() {
@@ -36,6 +51,14 @@ public class Room {
 
     public void setRoomLabel(String roomLabel) {
         this.roomLabel = roomLabel;
+    }
+
+    public String getLastEdit() {
+        return lastEdit;
+    }
+
+    public void setLastEdit(String lastEdit) {
+        this.lastEdit = lastEdit;
     }
 
     @Override
