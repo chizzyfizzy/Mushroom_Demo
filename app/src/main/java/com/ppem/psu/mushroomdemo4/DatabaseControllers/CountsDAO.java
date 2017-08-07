@@ -167,7 +167,6 @@ public class CountsDAO {
     }
 
     public void updateCountWithName(String oldName, String newName, boolean inChart){
-        int chartBool = (inChart) ? 1:0;
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.COUNT_NAME, newName);
         values.put(DatabaseHelper.COUNT_CHART_BOOLEAN, (inChart) ? 1:0);

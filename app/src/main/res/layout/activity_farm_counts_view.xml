@@ -17,22 +17,6 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
-    <Button
-        android:id="@+id/addNewCountButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Add"
-        android:layout_below="@+id/newCountEditText"
-        android:layout_centerHorizontal="true" />
-
-    <ListView
-        android:id="@+id/farmCountsListView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/addNewCountButton" />
-
     <CheckBox
         android:id="@+id/farmChartCountCheckBox"
         android:layout_width="wrap_content"
@@ -45,23 +29,119 @@
         android:layout_toRightOf="@+id/newCountEditText"
         android:layout_toEndOf="@+id/newCountEditText" />
 
-    <Button
-        android:id="@+id/updateCountButton"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/linearLayout3"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="28dp"
-        android:layout_marginRight="28dp"
-        android:text="Update"
-        android:layout_below="@+id/newCountEditText"
-        android:layout_toLeftOf="@+id/addNewCountButton"
-        android:layout_toStartOf="@+id/addNewCountButton" />
+        android:gravity="center"
+        android:layout_below="@+id/linearLayout"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:weightSum="1">
 
-    <Button
-        android:id="@+id/deleteCountButton"
-        android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/linearLayout4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/linearLayout"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/cellLabelExampleText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignEnd="@+id/newCountEditText"
+                android:layout_alignRight="@+id/newCountEditText"
+                android:layout_below="@+id/linearLayout"
+                android:text="1 - (10)" />
+
+            <TextView
+                android:id="@+id/countExampleText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignEnd="@+id/cellLabelExampleText"
+                android:layout_alignLeft="@+id/cellLabelExampleText"
+                android:layout_alignRight="@+id/cellLabelExampleText"
+                android:layout_alignStart="@+id/cellLabelExampleText"
+                android:layout_below="@+id/cellLabelExampleText"
+                android:text="Co" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/changeCountTextColor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/farmCountsListView"
+            android:layout_toLeftOf="@+id/changeCellLabelColorBtn"
+            android:layout_toStartOf="@+id/changeCellLabelColorBtn"
+            android:text="Count Color"
+            android:textSize="10sp" />
+
+        <Button
+            android:id="@+id/changeCellLabelColorBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/countExampleText"
+            android:layout_centerHorizontal="true"
+            android:text="Label Color"
+            android:textSize="10sp" />
+
+        <Button
+            android:id="@+id/changeBackgroundColorBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/changeCellLabelColorBtn"
+            android:layout_alignBottom="@+id/changeCellLabelColorBtn"
+            android:layout_alignLeft="@+id/farmChartCountCheckBox"
+            android:layout_alignStart="@+id/farmChartCountCheckBox"
+            android:layout_marginRight="32dp"
+            android:text="Background Color"
+            android:textSize="8sp" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/farmChartCountCheckBox"
-        android:layout_alignRight="@+id/farmChartCountCheckBox"
+        android:id="@+id/linearLayout"
+        android:gravity="center"
         android:layout_below="@+id/newCountEditText"
-        android:text="Delete" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+        <Button
+            android:id="@+id/addNewCountButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add" />
+
+        <Button
+            android:id="@+id/updateCountButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Update" />
+
+        <Button
+            android:id="@+id/deleteCountButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="Delete" />
+
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/farmCountsListView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/linearLayout3" />
+
+
 </RelativeLayout>

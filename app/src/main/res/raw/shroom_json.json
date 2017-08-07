@@ -1,0 +1,13 @@
+[
+		"plantInfo"{
+		"id": "1",
+		"plantName": "Plant 1",
+		"plantLabel": "Organic"
+		},
+
+		{
+		"id": "2",
+		"plantName": "Plant 2",
+		"plantLabel": ""
+		}
+]

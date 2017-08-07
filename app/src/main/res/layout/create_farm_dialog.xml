@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView5"
         android:layout_centerHorizontal="true"
-        android:text="You Can Edit These Details Later" />
+        android:text="(You can change details afterwards)" />
 
     <TextView
         android:id="@+id/textView7"
@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="11dp"
+        android:layout_marginTop="13dp"
         android:text="Farm Name:"
         android:textColor="@android:color/black"
         android:layout_below="@+id/textView13"
@@ -63,17 +63,6 @@
         android:layout_alignStart="@+id/textView9"
         android:text="Number of Plants "
         android:textColor="@android:color/black" />
-
-    <TextView
-        android:id="@+id/textView11"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Name of Rooms: "
-        android:textColor="@android:color/black"
-        android:layout_alignBaseline="@+id/roomNameEditText"
-        android:layout_alignBottom="@+id/roomNameEditText"
-        android:layout_alignLeft="@+id/textView10"
-        android:layout_alignStart="@+id/textView10" />
 
     <EditText
         android:id="@+id/farmNameEditText"
@@ -111,26 +100,15 @@
         android:layout_alignRight="@+id/textView13"
         android:layout_alignEnd="@+id/textView13" />
 
-    <EditText
-        android:id="@+id/roomNameEditText"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:layout_marginTop="13dp"
-        android:layout_below="@+id/buildingNumberEditText"
-        android:layout_alignLeft="@+id/buildingNameEditText"
-        android:layout_alignStart="@+id/buildingNameEditText" />
-
     <Button
         android:id="@+id/createFarmButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Create"
+        android:layout_marginTop="33dp"
         android:layout_below="@+id/farmDescrEditText"
-        android:layout_toLeftOf="@+id/textView5"
-        android:layout_toStartOf="@+id/textView5"
-        android:layout_marginTop="16dp" />
+        android:layout_alignRight="@+id/textView16"
+        android:layout_alignEnd="@+id/textView16" />
 
     <Button
         android:id="@+id/cancelFarmButton"
@@ -148,24 +126,24 @@
         android:id="@+id/textView16"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="33dp"
         android:text="Misc. Farm Details: "
         android:textColor="@android:color/black"
-        android:layout_below="@+id/roomNameEditText"
-        android:layout_alignLeft="@+id/textView11"
-        android:layout_alignStart="@+id/textView11" />
+        android:layout_below="@+id/buildingNumberEditText"
+        android:layout_toRightOf="@+id/textView9"
+        android:layout_toEndOf="@+id/textView9" />
 
     <EditText
         android:id="@+id/farmDescrEditText"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textView16"
-        android:layout_alignBottom="@+id/textView16"
-        android:layout_alignLeft="@+id/roomNameEditText"
-        android:layout_alignStart="@+id/roomNameEditText"
         android:ems="10"
         android:hint="(Optional)"
-        android:inputType="textPersonName" />
+        android:inputType="textPersonName"
+        android:layout_alignBaseline="@+id/textView16"
+        android:layout_alignBottom="@+id/textView16"
+        android:layout_alignLeft="@+id/buildingNameEditText"
+        android:layout_alignStart="@+id/buildingNameEditText" />
 
 
 </RelativeLayout>

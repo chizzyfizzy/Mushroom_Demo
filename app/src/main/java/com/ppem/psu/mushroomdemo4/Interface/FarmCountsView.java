@@ -2,6 +2,8 @@ package com.ppem.psu.mushroomdemo4.Interface;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,10 +13,10 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ppem.psu.mushroomdemo4.DatabaseControllers.CountsDAO;
-import com.ppem.psu.mushroomdemo4.DatabaseControllers.FarmDAO;
 import com.ppem.psu.mushroomdemo4.DatabaseControllers.RoomDAO;
 import com.ppem.psu.mushroomdemo4.Models.Count;
 import com.ppem.psu.mushroomdemo4.Models.Room;
@@ -22,14 +24,15 @@ import com.ppem.psu.mushroomdemo4.R;
 
 import java.util.List;
 
+import yuku.ambilwarna.AmbilWarnaDialog;
+
 public class FarmCountsView extends AppCompatActivity {
     RoomDAO roomDataSource;
     List<Room> roomList;
     CountsDAO countDataSource;
-    PlantListViewAdapter pAdapter;
-    FarmDAO farmDataSource;
     private long farmId;
-    Button addC, updateC, deleteC;
+    Button addC, updateC, deleteC, countColorBtn, cellColorBtn, backgroundColorBtn;
+    TextView exampleCell, exampleCount;
     EditText countName;
     CheckBox inChart;
     ListView countLV;
@@ -37,6 +40,11 @@ public class FarmCountsView extends AppCompatActivity {
     FarmCountsListAdapter adapter;
     Count count;
     private int index;
+    int countColor, cellColor, backgrndColor;
+    private final String sharedPrefsName = "AppPreferences";
+    SharedPreferences prefs;
+    SharedPreferences.Editor editor;
+
 
 
     @Override
@@ -50,6 +58,10 @@ public class FarmCountsView extends AppCompatActivity {
         roomList = roomDataSource.getAllRooms();
         countDataSource = new CountsDAO(this);
         countDataSource.open();
+        prefs = getSharedPreferences(sharedPrefsName, MODE_PRIVATE);
+        backgrndColor = prefs.getInt("Background Color", Color.BLACK);
+        cellColor = prefs.getInt("Cell Label Color", Color.CYAN);
+        countColor = prefs.getInt("Count Color", Color.GREEN);
 
         countList = countDataSource.getDistinctCounts();
         if(countList.size() == 0){
@@ -60,11 +72,21 @@ public class FarmCountsView extends AppCompatActivity {
         countLV = (ListView) findViewById(R.id.farmCountsListView);
         countLV.setAdapter(adapter);
 
+        exampleCell = (TextView) findViewById(R.id.cellLabelExampleText);
+        exampleCell.setBackgroundColor(backgrndColor);
+        exampleCell.setTextColor(cellColor);
+        exampleCount = (TextView) findViewById(R.id.countExampleText);
+        exampleCount.setBackgroundColor(backgrndColor);
+        exampleCount.setTextColor(countColor);
+
         countName = (EditText) findViewById(R.id.newCountEditText);
         inChart = (CheckBox) findViewById(R.id.farmChartCountCheckBox);
         addC = (Button) findViewById(R.id.addNewCountButton);
         updateC = (Button) findViewById(R.id.updateCountButton);
         deleteC = (Button) findViewById(R.id.deleteCountButton);
+        countColorBtn = (Button) findViewById(R.id.changeCountTextColor);
+        cellColorBtn = (Button) findViewById(R.id.changeCellLabelColorBtn);
+        backgroundColorBtn = (Button) findViewById(R.id.changeBackgroundColorBtn);
 
 
         countLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -74,6 +96,7 @@ public class FarmCountsView extends AppCompatActivity {
                 count = countList.get(position);
                 countName.setText(count.getCountName());
                 inChart.setChecked(count.isInChart());
+                exampleCount.setText(count.getCountName().substring(0,2));
             }
         });
 
@@ -144,6 +167,27 @@ public class FarmCountsView extends AppCompatActivity {
             }
         });
 
+        countColorBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeCountColorDialog();
+            }
+        });
+
+        cellColorBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeCellColorDialog();
+            }
+        });
+
+        backgroundColorBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeBackgroundColorDialog();
+            }
+        });
+
     }
 
     private void clearSelection(){
@@ -160,6 +204,77 @@ public class FarmCountsView extends AppCompatActivity {
         countDataSource.createDefaultCount("Cobweb", true);
         countDataSource.createDefaultCount("Syzygites", true);
         countDataSource.createDefaultCount("Blotch", true);
+    }
+
+    private void changeCountColorDialog(){
+
+        final AmbilWarnaDialog dialog = new AmbilWarnaDialog(FarmCountsView.this, countColor, true, new AmbilWarnaDialog.OnAmbilWarnaListener() {
+
+
+            @Override
+            public void onOk(AmbilWarnaDialog dialog, int color) {
+                Toast.makeText(getApplicationContext(), "Color Updated", Toast.LENGTH_SHORT).show();
+                countColor = color;
+                exampleCount.setTextColor(countColor);
+                editor = prefs.edit();
+                editor.putInt("Count Color",countColor);
+                editor.apply();
+            }
+
+            @Override
+            public void onCancel(AmbilWarnaDialog dialog) {
+            }
+        });
+        dialog.show();
+
+    }
+
+
+    private void changeCellColorDialog(){
+
+        final AmbilWarnaDialog dialog = new AmbilWarnaDialog(FarmCountsView.this, cellColor, true, new AmbilWarnaDialog.OnAmbilWarnaListener() {
+
+
+            @Override
+            public void onOk(AmbilWarnaDialog dialog, int color) {
+                Toast.makeText(getApplicationContext(), "Color Updated", Toast.LENGTH_SHORT).show();
+                cellColor = color;
+                exampleCell.setTextColor(cellColor);
+                editor = prefs.edit();
+                editor.putInt("Cell Label Color",cellColor);
+                editor.apply();
+            }
+
+            @Override
+            public void onCancel(AmbilWarnaDialog dialog) {
+            }
+        });
+        dialog.show();
+
+    }
+
+    private void changeBackgroundColorDialog(){
+
+        final AmbilWarnaDialog dialog = new AmbilWarnaDialog(FarmCountsView.this, backgrndColor, true, new AmbilWarnaDialog.OnAmbilWarnaListener() {
+
+
+            @Override
+            public void onOk(AmbilWarnaDialog dialog, int color) {
+                Toast.makeText(getApplicationContext(), "Color Updated", Toast.LENGTH_SHORT).show();
+                backgrndColor = color;
+                exampleCell.setBackgroundColor(backgrndColor);
+                exampleCount.setBackgroundColor(backgrndColor);
+                editor = prefs.edit();
+                editor.putInt("Background Color",backgrndColor);
+                editor.apply();
+            }
+
+            @Override
+            public void onCancel(AmbilWarnaDialog dialog) {
+            }
+        });
+        dialog.show();
+
     }
 
 

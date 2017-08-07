@@ -17,7 +17,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "farm.db";
 
     //Increment for every change in database structure.
-    public static final int DATABASE_VERSION = 40;
+    public static final int DATABASE_VERSION = 42;
 
     //Farm Table
     public static final String TABLE_NAME_FARMS = "Farms";
@@ -53,6 +53,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String ROOM_ID = "r_id";
     public static final String ROOM_NAME = "roomName";
     public static final String ROOM_LABEL = "roomLabel";
+    public static final String ROOM_COMMENT = "roomComment";
     public static final String ROOM_LAST_EDIT = "lastEdit";
     public static final String FK_PLANT_ID = "plantID";
     //Create Rooms Table Statement
@@ -60,6 +61,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             " ( " + ROOM_ID + " INTEGER PRIMARY KEY AUTOINCREMENT , "
             + ROOM_NAME + " TEXT NOT NULL, "
             + ROOM_LABEL + " TEXT, "
+            + ROOM_COMMENT + " TEXT, "
             + ROOM_LAST_EDIT + " TEXT, "
             + FK_PLANT_ID + " INTEGER NOT NULL, "
             + " FOREIGN KEY (" + FK_PLANT_ID + ") REFERENCES " + TABLE_NAME_PLANTS + " (" + PLANT_ID + ")"

@@ -1,6 +1,7 @@
 package com.ppem.psu.mushroomdemo4.Interface;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.Gravity;
@@ -23,6 +24,8 @@ import com.ppem.psu.mushroomdemo4.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+
 
 public class ChartFragment extends Fragment {
     private long bedId;
@@ -38,6 +41,7 @@ public class ChartFragment extends Fragment {
     Count currentCount;
     ChartView2 activity;
     String bedName;
+
 
     public ChartFragment(){
         //Required fragment constructor

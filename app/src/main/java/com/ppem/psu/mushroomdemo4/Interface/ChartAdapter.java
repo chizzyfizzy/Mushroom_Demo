@@ -2,6 +2,7 @@ package com.ppem.psu.mushroomdemo4.Interface;
 
 import android.content.Context;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -18,6 +19,8 @@ import com.ppem.psu.mushroomdemo4.R;
 
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+
 /**
  * Created by Mitchell on 7/17/2017.
  */
@@ -30,12 +33,15 @@ public class ChartAdapter extends ArrayAdapter<Cell> {
     int totalHeight = 0;
     int items;
     int rows = 0;
+    private final String sharedPrefsName = "AppPreferences";
+    SharedPreferences prefs;
 
     public ChartAdapter(Context context, List<Cell> cells){
         super(context, 0, cells);
         this.context = context;
         this.cellList = cells;
         this.countsForCellString = new String[cells.size()];
+        prefs = context.getSharedPreferences(sharedPrefsName, MODE_PRIVATE);
         //this.countsForCell = countsForCell;
 
     }
@@ -85,7 +91,7 @@ public class ChartAdapter extends ArrayAdapter<Cell> {
             String tempString = "";
             for (int i = 0; i < cell.getCountListInCell().size(); i++) { //Gets first letter of each count added
                 Count count = cell.getCountListInCell().get(i);
-                tempString += String.valueOf(count.getCountName().charAt(0));
+                tempString += count.getCountName().substring(0, 2);
                 countsForCellString[position] = tempString;
             }
             booleanArray.put(position, true);
@@ -96,12 +102,19 @@ public class ChartAdapter extends ArrayAdapter<Cell> {
         }
         //Set the text counts text at postion
         viewHolder.countsAdded.setText(countsForCellString[position]);
+        viewHolder.countsAdded.setTextColor(prefs.getInt("Count Color",Color.GREEN));
 
         //boolean array required to set background color of cells that have counts or not.
         if(booleanArray.get(position)){
-            view.setBackgroundColor(Color.GREEN);
+            view.setBackgroundColor(prefs.getInt("Background Color",0xffffff00));
+            viewHolder.cellColumn.setTextColor(prefs.getInt("Cell Label Color",Color.CYAN));
+            viewHolder.cellRow.setTextColor(prefs.getInt("Cell Label Color", Color.CYAN));
         }
-        else{view.setBackgroundColor(Color.TRANSPARENT);}
+        else{
+            view.setBackgroundColor(Color.TRANSPARENT);
+            viewHolder.cellColumn.setTextColor(Color.BLACK);
+            viewHolder.cellRow.setTextColor(Color.BLACK);
+        }
 
         return view;
     }

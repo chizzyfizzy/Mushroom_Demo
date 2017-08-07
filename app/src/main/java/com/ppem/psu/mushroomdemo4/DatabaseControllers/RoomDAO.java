@@ -20,7 +20,7 @@ public class RoomDAO {
     //DB Fields
     private SQLiteDatabase database;
     private DatabaseHelper dbHelper;
-    private String[] allColumns = {DatabaseHelper.ROOM_ID, DatabaseHelper.ROOM_NAME, DatabaseHelper.ROOM_LABEL, DatabaseHelper.ROOM_LAST_EDIT};
+    private String[] allColumns = {DatabaseHelper.ROOM_ID, DatabaseHelper.ROOM_NAME, DatabaseHelper.ROOM_LABEL, DatabaseHelper.ROOM_COMMENT, DatabaseHelper.ROOM_LAST_EDIT};
 
     public RoomDAO (Context context) {
         dbHelper = new DatabaseHelper(context);
@@ -79,12 +79,23 @@ public class RoomDAO {
         return roomList;
     }
 
+    public Room getRoom(long roomId){
+        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_ROOMS, allColumns, DatabaseHelper.ROOM_ID + " = " + roomId, null,null,null,null);
+        cursor.moveToFirst();
+        return cursorToRoom(cursor);
+    }
     public void updateRoom(String rName, String rLabel, long rId, long pId){
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.ROOM_NAME, rName);
         values.put(DatabaseHelper.ROOM_LABEL, rLabel);
         database.update(DatabaseHelper.TABLE_NAME_ROOMS, values, DatabaseHelper.ROOM_ID + " = " + rId + " AND "
                                                                 + DatabaseHelper.FK_PLANT_ID + " = " + pId, null);
+    }
+
+    public void updateRoomComment(String comment, long rId){
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.ROOM_COMMENT, comment);
+        database.update(DatabaseHelper.TABLE_NAME_ROOMS, values, DatabaseHelper.ROOM_ID + " = " + rId, null);
     }
 
     public void updateRoomDate(long rId, String date){
@@ -104,7 +115,8 @@ public class RoomDAO {
         room.setRoomId(cursor.getLong(0));
         room.setRoomName(cursor.getString(1));
         room.setRoomLabel(cursor.getString(2));
-        room.setLastEdit(cursor.getString(3));
+        room.setRoomComment(cursor.getString(3));
+        room.setLastEdit(cursor.getString(4));
         return room;
     }
 

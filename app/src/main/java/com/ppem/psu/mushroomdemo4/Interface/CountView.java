@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 
 import com.ppem.psu.mushroomdemo4.DatabaseControllers.CountsDAO;
+import com.ppem.psu.mushroomdemo4.DatabaseControllers.RoomDAO;
 import com.ppem.psu.mushroomdemo4.Models.Count;
 import com.ppem.psu.mushroomdemo4.Models.Room;
 import com.ppem.psu.mushroomdemo4.R;
@@ -65,6 +66,7 @@ public class CountView extends AppCompatActivity {
         String sentPName = intent.getStringExtra("Plant Name");
         theRoomName = intent.getStringExtra("Room Name");
         theRoomId = intent.getLongExtra("Room ID", 0);
+
         countDataSource = new CountsDAO(this);
         countDataSource.open();
         allCountsET = new ArrayList<>();
@@ -93,11 +95,11 @@ public class CountView extends AppCompatActivity {
             }
         });
 
-        countHistory = (Button) findViewById(R.id.historyButton);
+        countHistory = (Button) findViewById(R.id.commentButton);
         countHistory.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(CountView.this, "Function Not Implemented Currently", Toast.LENGTH_SHORT).show();
+                commentDialog();
             }
         });
 
@@ -131,7 +133,7 @@ public class CountView extends AppCompatActivity {
         tableRow.setBackgroundColor(Color.argb(255,63,81,181));
         tableRow.setLayoutParams(new Toolbar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
         TextView column_name = new TextView(this);
-        column_name.setText("        Type        "); //If these are changed to strings from AndroidResouce, the spaces are lost and view is ruined.
+        column_name.setText("        Name        "); //If these are changed to strings from AndroidResouce, the spaces are lost and view is ruined.
         column_name.setTextSize(30);
         tableRow.addView(column_name);
         TextView column_count = new TextView(this);
@@ -285,6 +287,29 @@ public class CountView extends AppCompatActivity {
                     Toast errorToast = Toast.makeText(CountView.this, "Error, please enter a name for the new measure", Toast.LENGTH_LONG);
                     errorToast.show();
                 }
+            }
+        });
+        AlertDialog a = alertBuilder.create();
+        a.show();
+    }
+
+    private void commentDialog(){
+        final RoomDAO roomData = new RoomDAO(CountView.this);
+        roomData.open();
+        Room room = roomData.getRoom(theRoomId);
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(CountView.this);
+        alertBuilder.setTitle("Leave a Comment: ");
+        LinearLayout layout = new LinearLayout(CountView.this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        final EditText comment = new EditText(CountView.this);
+        comment.setText(room.getRoomComment());
+        layout.addView(comment);
+        alertBuilder.setView(layout);
+        alertBuilder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                roomData.updateRoomComment(comment.getText().toString(), theRoomId);
+                roomData.close();
             }
         });
         AlertDialog a = alertBuilder.create();

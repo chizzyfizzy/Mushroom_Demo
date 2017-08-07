@@ -10,7 +10,6 @@ import android.os.Parcelable;
 //Model data
 public class Plant  {
     private long plantId;
-    private String farmName;
     private String plantName;
     private String plantLabel;
 
@@ -36,13 +35,6 @@ public class Plant  {
         this.plantId = id;
     }
 
-    public String getFarmName() {
-        return this.farmName;
-    }
-
-    public void setFarmName(String farmName) {
-        this.farmName = farmName;
-    }
 
     public String getPlantName() {
         System.out.println("The Plant Getters: " + this.plantLabel + " " + this.plantName);
@@ -68,5 +60,5 @@ public class Plant  {
         return plantName;
     }
 
-;
+
 }

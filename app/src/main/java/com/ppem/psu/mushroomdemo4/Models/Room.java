@@ -9,6 +9,7 @@ public class Room {
     private long roomId;
     private String roomName;
     private String roomLabel;
+    private String roomComment;
     private String lastEdit;
 
     public Room(){
@@ -51,6 +52,14 @@ public class Room {
 
     public void setRoomLabel(String roomLabel) {
         this.roomLabel = roomLabel;
+    }
+
+    public String getRoomComment() {
+        return roomComment;
+    }
+
+    public void setRoomComment(String roomComment) {
+        this.roomComment = roomComment;
     }
 
     public String getLastEdit() {

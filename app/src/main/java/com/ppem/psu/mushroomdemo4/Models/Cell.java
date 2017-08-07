@@ -9,7 +9,6 @@ import java.util.List;
 
 public class Cell {
     private long cellId;
-    private String cellBed;
     private int cellColumn;
     private int cellRow;
     private List<Count> countListInCell = new ArrayList<>();
@@ -21,15 +20,6 @@ public class Cell {
     public void setCellId(long cellId) {
         this.cellId = cellId;
     }
-
-    public String getCellBed() {
-        return cellBed;
-    }
-
-    public void setCellBed(String cellBed) {
-        this.cellBed = cellBed;
-    }
-
 
     public int getCellColumn() {
         return cellColumn;

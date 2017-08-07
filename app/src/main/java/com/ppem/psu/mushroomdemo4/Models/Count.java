@@ -69,6 +69,7 @@ public class Count {
         this.inChart = inChart;
     }
 
+
     @Override
     public String toString(){
         return countName;

@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -16,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.JsonReader;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
@@ -44,7 +46,11 @@ import com.ppem.psu.mushroomdemo4.R;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -53,21 +59,18 @@ import java.util.List;
     //Add all CRUD for every table
     //Create dialog menu for each dialog option (maybe)
                 //Farm & room dialog done.
-    //Try an expandable list view with PLant-> room?
+    //Try an expandable list view with Plant-> room?
     //JSON
     //Add count TYPE table (water, temp, etc.,)
     //Get rid of useless menu options for each activity
     //Calendar and date functionalities. (I guess make a new count object for each date a room is edited?
     //A room cycle feature, room mushroom type
     //Weekly counts feature
-    //A list of cells with specific counts for room. (Reverse of getting counts for cell function) For exporting data.
     //User Login to trace who edited what (save for amazon if I get there.)
-
-    //RoomListView CRUD is currently bugged**********
 
     //Add some sort of tutorial/FAQ page on how to do things for now?
     //Probably create fragments out some views instead of just an activity except for charts?
-//TODO List ----------------------------------------------- By Mitch, For Mitch
+//TODO List -----------------------------------------------
 
 
 public class PlantListView extends AppCompatActivity {
@@ -98,11 +101,19 @@ public class PlantListView extends AppCompatActivity {
         roomDataSource = new RoomDAO(this);
         countDataSource = new CountsDAO(this);
 
+        //JSON functions at very bototm
+       //loadJSONPlants();
+
     }
+
 
     @Override
     protected void onResume(){
         super.onResume();
+        loadSQLData();
+    }
+
+    private void loadSQLData(){
         farmDataSource.open();
         plantDataSource.open();
         prefs = getSharedPreferences(sharedPrefsName, MODE_PRIVATE);
@@ -135,7 +146,6 @@ public class PlantListView extends AppCompatActivity {
 
             }
         });
-
     }
 
     @Override
@@ -451,9 +461,10 @@ public class PlantListView extends AppCompatActivity {
                         for(Count count : countList) {
                             //date = new Date(count.getCountDate());
                           //  printDate = format.format(date);
-                            String countString[] = {/*printDate, */count.getCountName(), String.valueOf(count.getCountNumber())};
-                            csvWrite.writeNext(countString);
-
+                            if(count.getCountNumber() != 0) {
+                                String countString[] = {/*printDate, */count.getCountName(), String.valueOf(count.getCountNumber())};
+                                csvWrite.writeNext(countString);
+                            } else{ String countString[] = {/*printDate, */count.getCountName()}; csvWrite.writeNext(countString);}
                         }
                     }
                 }
@@ -496,5 +507,79 @@ public class PlantListView extends AppCompatActivity {
             }
         }
     }
+
+
+    //JSON functions
+    private void loadJSONPlants(){
+        try{
+            plantValues = readJsonStream();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+        pAdapter = new PlantListViewAdapter(this, plantValues);
+        plantLV = (ListView) findViewById(R.id.plantListView);
+        plantLV.setAdapter(pAdapter);
+        //list item click handler
+        plantLV = (ListView) findViewById(R.id.plantListView);
+        registerForContextMenu(plantLV);
+        plantLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Plant p = pAdapter.getItem(position);
+                RoomListView room = new RoomListView();
+                room.setPlantInfo(p);
+                Intent openRoomListIntent = new Intent(PlantListView.this, RoomListView.class);
+                startActivity(openRoomListIntent);
+
+            }
+        });
+    }
+
+
+    private List<Plant> readJsonStream() throws IOException{
+        Resources res = getResources();
+        InputStream in = res.openRawResource(R.raw.shroom_json);
+        JsonReader reader = new JsonReader(new InputStreamReader(in));
+        try{
+            return readPlantArray(reader);
+        }finally {
+            reader.close();
+        }
+    }
+
+    private List<Plant> readPlantArray(JsonReader reader) throws IOException {
+        List<Plant> plants = new ArrayList<Plant>();
+
+        reader.beginArray();
+        while(reader.hasNext()){
+            plants.add(readPlant(reader));
+        }
+        reader.endArray();
+        return plants;
+    }
+
+    private Plant readPlant(JsonReader reader) throws IOException{
+        long id = -1;
+        String pName = null;
+        String label = null;
+
+        reader.beginObject();
+        while(reader.hasNext()){
+            String name = reader.nextName();
+            if(name.equals("id")) {
+                id = reader.nextLong();
+            } else if (name.equals("plantName")){
+                pName = reader.nextString();
+            } else if (name.equals("plantLabel")){
+                label = reader.nextString();
+            } else {
+                reader.skipValue();
+            }
+        }
+        reader.endObject();
+        return new Plant(id, pName,label);
+    }
+
 
 }

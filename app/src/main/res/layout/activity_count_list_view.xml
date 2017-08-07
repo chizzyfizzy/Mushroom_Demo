@@ -74,11 +74,11 @@
             android:layout_weight="0.46"></Button>
 
         <Button
-            android:id="@+id/historyButton"
+            android:id="@+id/commentButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.55"
-            android:text="History" />
+            android:text="Comment" />
 
 
     </LinearLayout>
