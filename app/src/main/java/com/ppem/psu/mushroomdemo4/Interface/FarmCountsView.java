@@ -198,12 +198,13 @@ public class FarmCountsView extends AppCompatActivity {
     }
 
     private void createDefaultCounts(){
-        countDataSource.createDefaultCount("Fly 1", false);
-        countDataSource.createDefaultCount("Fly 2", false);
+        countDataSource.createDefaultCount("Sciarid", false);
+        countDataSource.createDefaultCount("Phorrid", false);
         countDataSource.createDefaultCount("Green Mold", true);
         countDataSource.createDefaultCount("Cobweb", true);
         countDataSource.createDefaultCount("Syzygites", true);
         countDataSource.createDefaultCount("Blotch", true);
+        countDataSource.createDefaultCount("Bubble", true);
     }
 
     private void changeCountColorDialog(){

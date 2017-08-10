@@ -40,8 +40,8 @@ import java.util.Locale;
 public class RoomListView extends AppCompatActivity {
     ListView roomLV;
     TextView pName, pLabel;
-    static long thePlantId;
-    static String thePlantName, thePlantLabel;
+    private long thePlantId;
+    private String thePlantName, thePlantLabel;
     private RoomListViewAdapter rAdapter;
     private List<Room> roomValues;
     private Date date;
@@ -52,6 +52,8 @@ public class RoomListView extends AppCompatActivity {
     private BedDAO bedDataSource;
     private int updatedRoom = 1;
     private Room room;
+    private Intent intent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +65,11 @@ public class RoomListView extends AppCompatActivity {
         cellDataSource = new CellDAO(this);
         countDataSource = new CountsDAO(this);
         bedDataSource = new BedDAO(this);
+
+        intent = getIntent();
+        thePlantName = intent.getStringExtra("Plant Name");
+        thePlantLabel = intent.getStringExtra("Plant Label");
+        thePlantId = intent.getLongExtra("Plant Id", 0);
     }
 
     @Override
@@ -315,9 +322,6 @@ public class RoomListView extends AppCompatActivity {
                             bedIncrement++;
                         }
                     }
-                    //Should just include in loop, and make it Create Count with roomId
-                    //Add counts that are already set to the room.
-
                     dialog.dismiss();
                     populateListView();
                 }
@@ -336,15 +340,11 @@ public class RoomListView extends AppCompatActivity {
         dialog.show();
     }
 
+    //If counts are updated, change the last edit date for the room
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == 1){
-            roomDataSource.updateRoomDate(room.getRoomId(), getDateTime());
-            populateListView();
-        }
-
-        if(resultCode == 1){
             roomDataSource.updateRoomDate(room.getRoomId(), getDateTime());
             populateListView();
         }
@@ -357,12 +357,13 @@ public class RoomListView extends AppCompatActivity {
     }
 
     private void createDefaultCounts(){
-        countDataSource.createDefaultCount("Fly 1", false);
-        countDataSource.createDefaultCount("Fly 2", false);
+        countDataSource.createDefaultCount("Sciarid", false);
+        countDataSource.createDefaultCount("Phorrid", false);
         countDataSource.createDefaultCount("Green Mold", true);
         countDataSource.createDefaultCount("Cobweb", true);
         countDataSource.createDefaultCount("Syzygites", true);
         countDataSource.createDefaultCount("Blotch", true);
+        countDataSource.createDefaultCount("Bubble", true);
     }
 
 }

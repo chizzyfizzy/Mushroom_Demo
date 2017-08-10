@@ -55,23 +55,6 @@ import java.util.Date;
 import java.util.List;
 
 
-//TODO List ---------------------------------------------
-    //Add all CRUD for every table
-    //Create dialog menu for each dialog option (maybe)
-                //Farm & room dialog done.
-    //Try an expandable list view with Plant-> room?
-    //JSON
-    //Add count TYPE table (water, temp, etc.,)
-    //Get rid of useless menu options for each activity
-    //Calendar and date functionalities. (I guess make a new count object for each date a room is edited?
-    //A room cycle feature, room mushroom type
-    //Weekly counts feature
-    //User Login to trace who edited what (save for amazon if I get there.)
-
-    //Add some sort of tutorial/FAQ page on how to do things for now?
-    //Probably create fragments out some views instead of just an activity except for charts?
-//TODO List -----------------------------------------------
-
 
 public class PlantListView extends AppCompatActivity {
     ListView plantLV, farmLV;
@@ -113,6 +96,7 @@ public class PlantListView extends AppCompatActivity {
         loadSQLData();
     }
 
+    //Was going to add JSON
     private void loadSQLData(){
         farmDataSource.open();
         plantDataSource.open();
@@ -139,15 +123,19 @@ public class PlantListView extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Plant p = pAdapter.getItem(position);
-                RoomListView room = new RoomListView();
-                room.setPlantInfo(p);
+               // RoomListView room = new RoomListView();
+               // room.setPlantInfo(p);
                 Intent openRoomListIntent = new Intent(PlantListView.this, RoomListView.class);
+                openRoomListIntent.putExtra("Plant Name", p.getPlantName());
+                openRoomListIntent.putExtra("Plant Id", p.getPlantId());
+                openRoomListIntent.putExtra("Plant Label", p.getPlantLabel());
                 startActivity(openRoomListIntent);
 
             }
         });
     }
 
+    //Close databases onDestroy
     @Override
     protected void onDestroy(){
         super.onDestroy();
@@ -155,7 +143,7 @@ public class PlantListView extends AppCompatActivity {
         plantDataSource.close();
     }
 
-    //Context menu on long button click (User holds selection on list item)
+    //Context menu on long button click (User holds selection on list item) - CRUD
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo){
         if(v.getId() == R.id.plantListView){
@@ -228,7 +216,7 @@ public class PlantListView extends AppCompatActivity {
     }
 
 
-    //Settings menu creator and handler
+    //Settings menu creator and handler (Three dots top right)
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -275,6 +263,7 @@ public class PlantListView extends AppCompatActivity {
                         }})
                     .setNegativeButton("Cancel", null).show();
         }
+        //Export data to CVS file
         if (id == R.id.exportData) {
             try {
                 roomDataSource.open();
@@ -292,8 +281,8 @@ public class PlantListView extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    //TODO Create custom dialog xml
-    //Create Plant Menu Option Selected
+
+    //Create Plant Menu Option Selected Dialog
     private void createPlantDialog(){
         final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(PlantListView.this);
         alertBuilder.setTitle("Enter a Name & a Label(Optional)");
@@ -330,6 +319,7 @@ public class PlantListView extends AppCompatActivity {
         a.show();
     }
 
+    //refresh the listView
     private void refreshData(){
         farmName.setText(farm.getFarmName());
         farmId = farm.getFarmId();
@@ -367,7 +357,6 @@ public class PlantListView extends AppCompatActivity {
         final EditText farmName = (EditText) dialog.findViewById(R.id.farmNameEditText);
         final EditText buildingName = (EditText) dialog.findViewById(R.id.buildingNameEditText);
         final EditText buildingNumber = (EditText) dialog.findViewById(R.id.buildingNumberEditText);
-        final EditText roomName = (EditText) dialog.findViewById(R.id.roomNameEditText);
         final EditText farmDescr = (EditText) dialog.findViewById(R.id.farmDescrEditText);
         Button createBtn = (Button) dialog.findViewById(R.id.createFarmButton);
         createBtn.setOnClickListener(new View.OnClickListener() {
@@ -375,7 +364,7 @@ public class PlantListView extends AppCompatActivity {
             public void onClick(View v) {
                 //Check if any value is empty
                 if(farmName.getText().toString().isEmpty() || buildingName.getText().toString().isEmpty()
-                        || buildingNumber.getText().toString().isEmpty() || roomName.getText().toString().isEmpty()){
+                        || buildingNumber.getText().toString().isEmpty()){
                     Toast errorToast = Toast.makeText(PlantListView.this, "Error: Not All Fields Filled. ", Toast.LENGTH_LONG);
                     errorToast.show();
                 }
@@ -443,6 +432,7 @@ public class PlantListView extends AppCompatActivity {
                 }
                 CSVWriter csvWrite = new CSVWriter(new FileWriter(file));
                 csvWrite.writeNext(columnHeaders);
+                //Loops through Plants -> Rooms -> Counts
                 //Plant Loop
                 for (Plant plant : plantList) { //TODO nested for loops for room & count data
                     //String pId = String.valueOf(plant.getPlantId());
@@ -459,12 +449,11 @@ public class PlantListView extends AppCompatActivity {
                         countList = countDataSource.getAllCountsForRoom(room.getRoomId());
                         //Count for Room Loop
                         for(Count count : countList) {
-                            //date = new Date(count.getCountDate());
-                          //  printDate = format.format(date);
+                            //Only print count if the values is not 0.
                             if(count.getCountNumber() != 0) {
                                 String countString[] = {/*printDate, */count.getCountName(), String.valueOf(count.getCountNumber())};
                                 csvWrite.writeNext(countString);
-                            } else{ String countString[] = {/*printDate, */count.getCountName()}; csvWrite.writeNext(countString);}
+                            }
                         }
                     }
                 }
@@ -475,11 +464,7 @@ public class PlantListView extends AppCompatActivity {
             } catch (Exception e) {
                 Log.e("PlantListView", e.getMessage(), e);
                 return false;
-            } /*catch (IOException e) {
-                Log.e("PlantListView", e.getMessage(), e);
-                return false;
-            }Don't Neeed maybe?*/
-
+            }
         }
 
         protected void onPostExecute(final Boolean success) {

@@ -11,7 +11,7 @@ public class Count {
     private String countName;
     private int countNumber;
     private boolean inChart;
-    private Date countDate;
+    private long countDate;
 
     public Count(){
         this.countId = getCountId();
@@ -53,11 +53,11 @@ public class Count {
         this.countNumber = countNumber;
     }
 
-    public Date getCountDate() {
+    public long getCountDate() {
         return countDate;
     }
 
-    public void setCountDate(Date countDate) {
+    public void setCountDate(long countDate) {
         this.countDate = countDate;
     }
 

@@ -42,8 +42,6 @@ public class ChartAdapter extends ArrayAdapter<Cell> {
         this.cellList = cells;
         this.countsForCellString = new String[cells.size()];
         prefs = context.getSharedPreferences(sharedPrefsName, MODE_PRIVATE);
-        //this.countsForCell = countsForCell;
-
     }
 
     @Override
@@ -54,12 +52,13 @@ public class ChartAdapter extends ArrayAdapter<Cell> {
         items = cellList.size();
 
 
+        //This is suppose to prevent recycling of a view, but still does.
         if(view == null) {
             final LayoutInflater layoutInflater = LayoutInflater.from(getContext());
             view = layoutInflater.inflate(R.layout.grid_chart_item, null);
 
-            //For some reason this makes the grid cells nicer looking.
-            //It was an attempt to make the whole gridview fit the screen with no scrolling to avoid having the added count-textviews from appearing in random places.
+            //For some reason this makes the gridview look nice
+            //It started as an attempt to make the whole gridview fit the screen with no scrolling to avoid having the added count-textviews from appearing in random places.
             view.measure(0, 0);
             totalHeight = view.getMeasuredHeight() + 50;
             float x = 1;
@@ -89,28 +88,30 @@ public class ChartAdapter extends ArrayAdapter<Cell> {
         //This adds counts to cells that have been selected (should get selected ones from last edit DATE)
         if(cell.getCountListInCell().size() > 0) {
             String tempString = "";
-            for (int i = 0; i < cell.getCountListInCell().size(); i++) { //Gets first letter of each count added
+            for (int i = 0; i < cell.getCountListInCell().size(); i++) { //Gets first 2 letters of each count added, add to one string.
                 Count count = cell.getCountListInCell().get(i);
                 tempString += count.getCountName().substring(0, 2);
-                countsForCellString[position] = tempString;
+                countsForCellString[position] = tempString; //Saves the string to the cell position to prevent recycling the view on scroll/swiping
             }
-            booleanArray.put(position, true);
+            booleanArray.put(position, true);//Prevents recycling the highlighted view on scroll/swiping
         }
         else{
             countsForCellString[position] = "";
             booleanArray.put(position, false);
         }
+
         //Set the text counts text at postion
         viewHolder.countsAdded.setText(countsForCellString[position]);
         viewHolder.countsAdded.setTextColor(prefs.getInt("Count Color",Color.GREEN));
 
         //boolean array required to set background color of cells that have counts or not.
+        //If boolean at position == true, used sharedPreferences colors.
         if(booleanArray.get(position)){
             view.setBackgroundColor(prefs.getInt("Background Color",0xffffff00));
             viewHolder.cellColumn.setTextColor(prefs.getInt("Cell Label Color",Color.CYAN));
             viewHolder.cellRow.setTextColor(prefs.getInt("Cell Label Color", Color.CYAN));
         }
-        else{
+        else{ //If boolean at position == false, keep it default.
             view.setBackgroundColor(Color.TRANSPARENT);
             viewHolder.cellColumn.setTextColor(Color.BLACK);
             viewHolder.cellRow.setTextColor(Color.BLACK);

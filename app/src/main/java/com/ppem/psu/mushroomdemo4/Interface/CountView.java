@@ -32,14 +32,12 @@ import com.ppem.psu.mushroomdemo4.R;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class CountView extends AppCompatActivity {
 
     private TextView pName, rName, dateText;
-    private Button saveBtn, openChartButton, countHistory;
+    private Button saveBtn, openChartButton, roomComment;
     private CountsDAO countDataSource;
     List<EditText> allCountsET;
     List<TextView> allCountNamesET;
@@ -61,7 +59,6 @@ public class CountView extends AppCompatActivity {
         //Prevents Keyboard opening automatically when screen opens
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
-        //Define variables & simple get plant name for label
         intent = getIntent();
         String sentPName = intent.getStringExtra("Plant Name");
         theRoomName = intent.getStringExtra("Room Name");
@@ -95,8 +92,8 @@ public class CountView extends AppCompatActivity {
             }
         });
 
-        countHistory = (Button) findViewById(R.id.commentButton);
-        countHistory.setOnClickListener(new View.OnClickListener() {
+        roomComment = (Button) findViewById(R.id.commentButton);
+        roomComment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 commentDialog();
@@ -139,9 +136,10 @@ public class CountView extends AppCompatActivity {
         TextView column_count = new TextView(this);
         column_count.setText("       #       ");
         column_count.setTextSize(30);
-
         tableRow.addView(column_count);
         tableLayout.addView(tableRow);
+
+        //Adding Counts
         List<Count> countValues = countDataSource.getAllCountsForRoom(theRoomId);
         int size = countValues.size();
         countNameTextArray = new TextView[size];
@@ -150,10 +148,11 @@ public class CountView extends AppCompatActivity {
 
         //Loop to add all counts to view
         for(int i =0; i < size; i++){
+            //create new table row
             String countName = countValues.get(i).getCountName();
             int countId = (int) countValues.get(i).getCountId();
             rowArray[i] = new TableRow(getApplicationContext());
-            rowArray[i].setId(countId);
+            rowArray[i].setId(countId); //Set Id of row for same as countId. For updating counts.
 
             //create and set countName TextView
             countNameTextArray[i] = new TextView(getApplicationContext());
@@ -166,7 +165,7 @@ public class CountView extends AppCompatActivity {
             //Add textName view to row
             rowArray[i].addView(countNameTextArray[i]);
 
-            //create and set count number edit text view
+            //create and set count number edittext view
             countNumTextArray[i] = new EditText(getApplicationContext());
             countNumTextArray[i].setId(countId);
             countNumTextArray[i].setInputType(InputType.TYPE_CLASS_NUMBER);
@@ -174,7 +173,7 @@ public class CountView extends AppCompatActivity {
             countNumTextArray[i].setTextColor(Color.BLACK);
             countNumTextArray[i].setPadding(0,0,0,20);
             countNumTextArray[i].setGravity(Gravity.CENTER_HORIZONTAL);
-            //Gets value for count from previous data entry (if there was any).
+            //Gets value for count from previous data entry (if there was any) or else error.
             if(countValues.get(i).getCountNumber() != 0) {
                 countNumTextArray[i].setText(String.valueOf(countValues.get(i).getCountNumber()));
             } //Add edit text view to row
@@ -187,7 +186,6 @@ public class CountView extends AppCompatActivity {
     }
 
     //Settings Menu Creator & Handler (3 dots top right of screen)
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -195,7 +193,7 @@ public class CountView extends AppCompatActivity {
         return true;
     }
 
-    @Override //TODO Delete Count Values, Delete All Counts for All Rooms
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -219,12 +217,6 @@ public class CountView extends AppCompatActivity {
     }
 
 
-    //Gets passed room info for labels and inserting measure for given room.
-    public void setRoomInfo(Room room){
-        theRoomName = room.getRoomName();
-        theRoomId = room.getRoomId();
-    }
-
     //Loop through all counts and update counts
     public void updateCounts(){
         for(int i = 1; i<tableLayout.getChildCount();i++){
@@ -239,13 +231,14 @@ public class CountView extends AppCompatActivity {
                     updatedToast.show();
                 }
             }
+            //For Activity Result: Since updating counts, return that the room has been updated to change the LastEdit date of the room
             setResult(1, intent);
+            //Closes the activity.
             finish();
         }
     }
 
 
-    //TODO Create custom dialog xml
     //Quick way to add a new count instead of going all the way back to the farm-counts-view
     private void createNewCount(){
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(CountView.this);
@@ -293,6 +286,7 @@ public class CountView extends AppCompatActivity {
         a.show();
     }
 
+    //Dialog to edit comment for room
     private void commentDialog(){
         final RoomDAO roomData = new RoomDAO(CountView.this);
         roomData.open();
@@ -316,12 +310,6 @@ public class CountView extends AppCompatActivity {
         a.show();
     }
 
-
-    private String getDateTime(){
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd", Locale.getDefault());
-        Date date = new Date();
-        return dateFormat.format(date);
-    }
 
 
 }

@@ -50,6 +50,7 @@ public class ChartFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+        //Get and set Bed Info
         Bundle args = getArguments();
         roomId = args.getLong("room");
         bedId = args.getLong("bed");
@@ -75,7 +76,8 @@ public class ChartFragment extends Fragment {
         countCellDataSource = new CountCellEntityDAO(context);
         countCellDataSource.open();
         countsForCell = new ArrayList<>();
-        for(int i = 0; i < cellList.size(); i++){ //Loop that gets counts that were added to the cell. Sets a list of counts for the cell that are added to the view in the adapter.
+        //Loop that gets counts that were added to the cell. Sets a list of counts for the cell, which are added to the view in the adapter
+        for(int i = 0; i < cellList.size(); i++){
             countsForCell = countCellDataSource.getDistinctCountsForCell(cellList.get(i).getCellId());
             cellList.get(i).setCountListInCell(countsForCell);
         }
@@ -101,6 +103,7 @@ public class ChartFragment extends Fragment {
             }
         });
 
+        //Drop down menu for counts
         CountSpinnerAdapter spinnerAdapter = new CountSpinnerAdapter(context, R.layout.count_spinner_item, spinnerCountList);
         spinnerAdapter.setDropDownViewResource(R.layout.count_spinner_item);
         Spinner countSpinner = (Spinner) rootView.findViewById(R.id.countSpinner);
@@ -132,6 +135,7 @@ public class ChartFragment extends Fragment {
                 + "-" + selectedCell.getCellColumn()
                 + "(" + selectedCell.getCellRow() + ")", Toast.LENGTH_SHORT).show();
     }
+
 
     private boolean deleteCountFromCell(Cell selectedCell){
         for(int i = 0; i < selectedCell.getCountListInCell().size(); i++){

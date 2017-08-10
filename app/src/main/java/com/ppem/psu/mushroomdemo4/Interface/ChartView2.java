@@ -53,6 +53,7 @@ public class ChartView2 extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //Set up tabs
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
     }
@@ -86,7 +87,7 @@ public class ChartView2 extends AppCompatActivity {
         viewPager.setAdapter(adapter);
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
-        //On selected fragment, change current bed selection, return fragment from fragment list.
+        //On tab select, change current bed selection, return fragment from fragment list.
         viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -103,7 +104,7 @@ public class ChartView2 extends AppCompatActivity {
         });
     }
 
-    //Fragnent Adapter
+    //Fragnent Adapter. Create and retrieve Fragments
     class ViewPagerAdapter extends FragmentStatePagerAdapter {
         private final List<ChartFragment> fragList = new ArrayList<>();
         private final List<String> fragTitleList = new ArrayList<>();
@@ -147,7 +148,8 @@ public class ChartView2 extends AppCompatActivity {
         return true;
     }
 
-    @Override //TODO Create & Edit Chart functions
+    //Does nothing
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -155,7 +157,7 @@ public class ChartView2 extends AppCompatActivity {
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         if(id == R.id.editBeds) {
-            //TODO Add functionality to CRUD individual Beds.
+            //TODO Add functionality to CRUD individual Beds?
         }
         return super.onOptionsItemSelected(item);
     }

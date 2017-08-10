@@ -10,8 +10,13 @@ import android.provider.ContactsContract;
 import com.ppem.psu.mushroomdemo4.Models.Count;
 import com.ppem.psu.mushroomdemo4.Models.Room;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import static java.util.Locale.getDefault;
 
@@ -109,7 +114,7 @@ public class CountsDAO {
 
     public List<Count> getAllCountsForRoom (long roomId) {
         List<Count> countList = new ArrayList<Count>();
-        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_COUNTS, allColumns, DatabaseHelper.FK_COUNT_ROOM + " = " + roomId, null, null, null, null);
+        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME_COUNTS, allColumns, DatabaseHelper.FK_COUNT_ROOM + " = " + roomId, null, null, null, DatabaseHelper.COUNT_CHART_BOOLEAN);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             Count count = cursorToCount(cursor);
@@ -216,7 +221,6 @@ public class CountsDAO {
         room.setRoomName(cursor.getString(1));
         return room;
     }
-
 
 
 }
